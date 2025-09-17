@@ -1,10 +1,8 @@
 import numpy as np
 import mediapipe as mp
-from jaxlib.utils import foreach
 
 mp_pose = mp.solutions.pose
 
-# Angle names to compute
 ANGLE_NAMES = [
     "left_elbow_angle",
     "right_elbow_angle",
@@ -16,7 +14,6 @@ ANGLE_NAMES = [
     "right_hip_angle"
 ]
 
-# Mapping body landmarks to Mediapipe PoseLandmark
 LANDMARK_MAP = {
     "left_shoulder": mp_pose.PoseLandmark.LEFT_SHOULDER,
     "right_shoulder": mp_pose.PoseLandmark.RIGHT_SHOULDER,
@@ -33,249 +30,145 @@ LANDMARK_MAP = {
 }
 
 def calculate_angle(pA, pB, pC):
-    """
-    Calculate the angle (in degrees) between three points pA, pB, pC.
-    The angle is between vectors BA and BC, with B as the central point.
-    """
-    a = np.array(pA)
-    b = np.array(pB)
-    c = np.array(pC)
-
-    ba = a - b
-    bc = c - b
-
-    # Compute angle in degrees
+    a, b, c = np.array(pA), np.array(pB), np.array(pC)
+    ba, bc = a - b, c - b
     cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)  # Prevent numerical errors
-    angle = np.degrees(np.arccos(cosine_angle))
-    return angle
+    cosine_angle = np.clip(cosine_angle, -1.0, 1.0)
+    return np.degrees(np.arccos(cosine_angle))
 
 def safe_calculate_angle(pA, pB, pC):
-    """
-    Safe wrapper for calculate_angle.
-    Returns None if data is invalid (e.g., missing point).
-    """
     try:
         return calculate_angle(pA, pB, pC)
     except Exception:
         return None
-    
+
 def compute_all_angles(results):
-    """
-    Given Mediapipe results, return a dictionary:
-    {
-        "left_elbow_angle": 145.2,
-        "right_elbow_angle": 167.3,
-        ...
-    }
-    """
     if results is None or not hasattr(results, "pose_landmarks") or results.pose_landmarks is None:
         return {name: None for name in ANGLE_NAMES}
-
     lm = results.pose_landmarks.landmark
-
     def get_point(name):
         if name not in LANDMARK_MAP:
             return None
         idx = LANDMARK_MAP[name].value
         landmark = lm[idx]
         return (landmark.x, landmark.y)
-
-    angles = {}
-
-    # Elbows
-    angles["left_elbow_angle"] = safe_calculate_angle(
-        get_point("left_shoulder"), get_point("left_elbow"), get_point("left_wrist")
-    )
-    angles["right_elbow_angle"] = safe_calculate_angle(
-        get_point("right_shoulder"), get_point("right_elbow"), get_point("right_wrist")
-    )
-
-    # Shoulders
-    angles["left_shoulder_angle"] = safe_calculate_angle(
-        get_point("left_elbow"), get_point("left_shoulder"), get_point("left_hip")
-    )
-    angles["right_shoulder_angle"] = safe_calculate_angle(
-        get_point("right_elbow"), get_point("right_shoulder"), get_point("right_hip")
-    )
-
-    # Knees
-    angles["left_knee_angle"] = safe_calculate_angle(
-        get_point("left_hip"), get_point("left_knee"), get_point("left_ankle")
-    )
-    angles["right_knee_angle"] = safe_calculate_angle(
-        get_point("right_hip"), get_point("right_knee"), get_point("right_ankle")
-    )
-
-    # Hips
-    angles["left_hip_angle"] = safe_calculate_angle(
-        get_point("left_shoulder"), get_point("left_hip"), get_point("left_knee")
-    )
-    angles["right_hip_angle"] = safe_calculate_angle(
-        get_point("right_shoulder"), get_point("right_hip"), get_point("right_knee")
-    )
-
-    return angles
+    return {
+        "left_elbow_angle": safe_calculate_angle(get_point("left_shoulder"), get_point("left_elbow"), get_point("left_wrist")),
+        "right_elbow_angle": safe_calculate_angle(get_point("right_shoulder"), get_point("right_elbow"), get_point("right_wrist")),
+        "left_shoulder_angle": safe_calculate_angle(get_point("left_elbow"), get_point("left_shoulder"), get_point("left_hip")),
+        "right_shoulder_angle": safe_calculate_angle(get_point("right_elbow"), get_point("right_shoulder"), get_point("right_hip")),
+        "left_knee_angle": safe_calculate_angle(get_point("left_hip"), get_point("left_knee"), get_point("left_ankle")),
+        "right_knee_angle": safe_calculate_angle(get_point("right_hip"), get_point("right_knee"), get_point("right_ankle")),
+        "left_hip_angle": safe_calculate_angle(get_point("left_shoulder"), get_point("left_hip"), get_point("left_knee")),
+        "right_hip_angle": safe_calculate_angle(get_point("right_shoulder"), get_point("right_hip"), get_point("right_knee")),
+    }
 
 def get_angle_direction(a, b, c):
-    """
-    Given 3 points (a,b,c), where b is the vertex,
-    return the direction name of the angle at b (up, down, left, right, diagonals).
-    """
     if a is None or b is None or c is None:
         return None
-
-    # convert to np.array
-    a = np.array(a)
-    b = np.array(b)
-    c = np.array(c)
-
-    # vectors from b
-    ab = a - b
-    cb = c - b  # b->c is c-b
-
-    # normalize vectors to unit length
+    a, b, c = np.array(a), np.array(b), np.array(c)
+    ab, cb = a - b, c - b
     if np.linalg.norm(ab) == 0 or np.linalg.norm(cb) == 0:
         return "undefined"
-    ab_unit = ab / np.linalg.norm(ab)
-    cb_unit = cb / np.linalg.norm(cb)
-
-    # bisector-ish vector
-    dx = ab_unit[0] + cb_unit[0]
-    dy = ab_unit[1] + cb_unit[1]
-
+    ab, cb = ab / np.linalg.norm(ab), cb / np.linalg.norm(cb)
+    dx, dy = ab[0] + cb[0], ab[1] + cb[1]
     if dx == 0 and dy == 0:
         return "undefined"
-
-    # decide orientation
     if abs(dx) > abs(dy):
         return "right" if dx > 0 else "left"
     elif abs(dy) > abs(dx):
         return "down" if dy > 0 else "up"
     else:
-        # diagonal
-        if dx > 0 and dy > 0:
-            return "down-right"
-        elif dx > 0 and dy < 0:
-            return "up-right"
-        elif dx < 0 and dy > 0:
-            return "down-left"
-        else:
-            return "up-left"
+        if dx > 0 and dy > 0: return "down-right"
+        if dx > 0 and dy < 0: return "up-right"
+        if dx < 0 and dy > 0: return "down-left"
+        return "up-left"
 
 def compute_all_angle_directions(results):
     if results is None or not hasattr(results, "pose_landmarks") or results.pose_landmarks is None:
         return {name: None for name in ANGLE_NAMES}
-
     lm = results.pose_landmarks.landmark
-
     def get_point(name):
         if name not in LANDMARK_MAP:
             return None
         idx = LANDMARK_MAP[name].value
         landmark = lm[idx]
         return (landmark.x, landmark.y)
+    return {
+        "left_elbow_angle": get_angle_direction(get_point("left_shoulder"), get_point("left_elbow"), get_point("left_wrist")),
+        "right_elbow_angle": get_angle_direction(get_point("right_shoulder"), get_point("right_elbow"), get_point("right_wrist")),
+        "left_shoulder_angle": get_angle_direction(get_point("left_elbow"), get_point("left_shoulder"), get_point("left_hip")),
+        "right_shoulder_angle": get_angle_direction(get_point("right_elbow"), get_point("right_shoulder"), get_point("right_hip")),
+        "left_knee_angle": get_angle_direction(get_point("left_hip"), get_point("left_knee"), get_point("left_ankle")),
+        "right_knee_angle": get_angle_direction(get_point("right_hip"), get_point("right_knee"), get_point("right_ankle")),
+        "left_hip_angle": get_angle_direction(get_point("left_shoulder"), get_point("left_hip"), get_point("left_knee")),
+        "right_hip_angle": get_angle_direction(get_point("right_shoulder"), get_point("right_hip"), get_point("right_knee")),
+    }
 
-    directions = {}
+# === NEW COACH-TONE COMPARE ===
+SIDE_EN = {"left": "left", "right": "right"}
+JOINT_LABEL_EN = {"elbow": "elbow", "shoulder": "shoulder", "knee": "knee", "hip": "hip"}
+DISTAL_SEGMENT_EN = {"elbow": "forearm", "shoulder": "upper arm", "knee": "shin", "hip": "knee"}
 
-    # Elbows
-    directions["left_elbow_angle"] = get_angle_direction(
-        get_point("left_shoulder"), get_point("left_elbow"), get_point("left_wrist")
-    )
-    directions["right_elbow_angle"] = get_angle_direction(
-        get_point("right_shoulder"), get_point("right_elbow"), get_point("right_wrist")
-    )
+def angle_action_en(joint_kind, is_open):
+    if joint_kind in ("elbow", "knee"):
+        return "Bend" if is_open else "Straighten"
+    if joint_kind in ("shoulder", "hip"):
+        return "Close" if is_open else "Open"
+    return "Adjust"
 
-    # Shoulders
-    directions["left_shoulder_angle"] = get_angle_direction(
-        get_point("left_elbow"), get_point("left_shoulder"), get_point("left_hip")
-    )
-    directions["right_shoulder_angle"] = get_angle_direction(
-        get_point("right_elbow"), get_point("right_shoulder"), get_point("right_hip")
-    )
+def direction_to_en(d):
+    m = {
+        "up": "Lift",
+        "down": "Lower",
+        "left": "Shift left",
+        "right": "Shift right",
+        "up-right": "Lift slightly and shift right",
+        "up-left": "Lift slightly and shift left",
+        "down-right": "Lower slightly and shift right",
+        "down-left": "Lower slightly and shift left",
+    }
+    return m.get(d, "Hold direction")
 
-    # Knees
-    directions["left_knee_angle"] = get_angle_direction(
-        get_point("left_hip"), get_point("left_knee"), get_point("left_ankle")
-    )
-    directions["right_knee_angle"] = get_angle_direction(
-        get_point("right_hip"), get_point("right_knee"), get_point("right_ankle")
-    )
+def adverb_for_diff(d):
+    if d < 8: return "slightly"
+    if d < 15: return "a bit"
+    return f"about {int(round(d))}°"
 
-    # Hips
-    directions["left_hip_angle"] = get_angle_direction(
-        get_point("left_shoulder"), get_point("left_hip"), get_point("left_knee")
-    )
-    directions["right_hip_angle"] = get_angle_direction(
-        get_point("right_shoulder"), get_point("right_hip"), get_point("right_knee")
-    )
+def parse_joint_meta(name):
+    side = "left" if name.startswith("left") else "right"
+    if "elbow" in name: kind = "elbow"
+    elif "shoulder" in name: kind = "shoulder"
+    elif "knee" in name: kind = "knee"
+    else: kind = "hip"
+    return side, kind
 
-    return directions
-
-def compare_poses(angles1, angles2, directions1, directions2 ,threshold=15):
+def compare_poses(angles_user, angles_ref, dirs_user, dirs_ref, threshold_deg=10.0):
     fixes = {}
-
-    for n in ANGLE_NAMES:
-        diff = angles1[n] - angles2[n]
-        pure_diff = diff
-        if diff < 0: diff*=(-1)
-
-        #OPEN/CLOSE/OK:
-        instruction = "~" #ok #default
-        if diff > threshold:
-            if pure_diff > 0:
-                instruction += "+" #open
-            else:
-                instruction += "-" #close
-
-        #
-        do_char = "a" #almost there!
-        if directions1[n] != directions2[n]:
-            if directions2[n] == "up":
-                if directions1[n] == "right":
-                    if n[0] == 'r': do_char = "u" #right leg/arm #move Up
-                    else: do_char = "d" #left leg/arm #move Down
-                if directions1[n] == "left":
-                    if n[0] == 'r': do_char = "d" #right leg/arm #move Down
-                    else: do_char = "u" #left leg/arm #move Up
-                if directions1[n] == "down":
-                    do_char = "x" #opposite direction!
-
-            if directions2[n] == "down":
-                if directions1[n] == "right":
-                    if n[0] == 'r': do_char = "d" #right leg/arm #move Down
-                    else: do_char = "u" #left leg/arm #move Up
-                if directions1[n] == "left":
-                    if n[0] == 'r': do_char = "u" #right leg/arm #move Up
-                    else: do_char = "d" #left leg/arm #move Down
-                if directions1[n] == "up":
-                    do_char = "x" #opposite direction!
-
-            if directions2[n] == "right":
-                if directions1[n] == "up":
-                    if "knee" in n or "hip" in n: do_char = "u" #right leg/arm #move Up
-                    else: do_char = "d" #left leg/arm #move Down
-                if directions1[n] == "down":
-                    if "knee" in n or "hip" in n: do_char = "u"  # right leg/arm #move Up
-                    else: do_char = "d"  # left leg/arm #move Down
-                if directions1[n] == "left":
-                    do_char = "x" #opposite direction!
-
-            if directions2[n] == "left":
-                if directions1[n] == "up":
-                    if "knee" in n or "hip" in n: do_char = "u" #right leg/arm #move Up
-                    else: do_char = "d" #left leg/arm #move Down
-                if directions1[n] == "down":
-                    if "knee" in n or "hip" in n: do_char = "u"  # right leg/arm #move Up
-                    else: do_char = "d"  # left leg/arm #move Down
-                if directions1[n] == "right":
-                    do_char = "x" #opposite direction!
+    for name in ANGLE_NAMES:
+        au, ar = angles_user.get(name), angles_ref.get(name)
+        du, dr = dirs_user.get(name), dirs_ref.get(name)
+        if au is None or ar is None:
+            continue
+        side, kind = parse_joint_meta(name)
+        side_en, joint_en, distal_en = SIDE_EN[side], JOINT_LABEL_EN[kind], DISTAL_SEGMENT_EN[kind]
+        diff, abs_diff, is_open = au - ar, abs(au - ar), (au - ar) > 0
+        angle_instr = angle_action_en(kind, is_open) if abs_diff > threshold_deg else "Hold"
+        dir_instr = direction_to_en(dr) if du != dr and dr is not None else "Hold direction"
+        how_much = adverb_for_diff(abs_diff)
+        cues = []
+        if angle_instr != "Hold":
+            cues.append(f"{angle_instr} {how_much}")
+        if dir_instr != "Hold direction":
+            cues.append(f"{'and ' if cues else ''}{dir_instr.lower()} the {distal_en}")
+        if not cues:
+            message = f"{side_en.capitalize()} {joint_en}: Nice form—hold it steady. Great work!"
         else:
-            do_char = "~"  #perfect direction
-
-        instruction += do_char
-
-        if instruction != "~~": #if no problem (perfect angle & direction)
-            fixes[n] = (int(diff),instruction)
-
+            message = f"{side_en.capitalize()} {joint_en}: " + " ".join(cues) + ". You've got this!"
+        fixes[name] = {
+            "angle_diff_deg": int(round(abs_diff)),
+            "angle_action": angle_instr,
+            "direction_action": dir_instr,
+            "message_en": message
+        }
     return fixes
