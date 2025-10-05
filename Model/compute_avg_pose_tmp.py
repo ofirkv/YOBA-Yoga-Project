@@ -82,3 +82,5 @@ with open(output_filename, "w") as f:
     json.dump(pose_data, f, indent=4)
 
 print(f"\nAverage pose saved to {output_filename}")
+
+#some change to check git!!
