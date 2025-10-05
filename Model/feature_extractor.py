@@ -1,6 +1,6 @@
 # feature_extractor.py
 import numpy as np
-from pose_utils import ANGLE_NAMES
+from Model.pose_utils import ANGLE_NAMES
 
 class FeatureExtractor:
     def __init__(self):
@@ -45,7 +45,7 @@ class FeatureExtractor:
 
         return np.array(features, dtype=np.float32)
     
-    def vector_to_dicts(vector):
+    def vector_to_dicts(self, vector):
         """
         Convert a 1D numpy array (angles + directions) back into two dicts:
         angles_dict and directions_dict.
