@@ -1,6 +1,6 @@
 # pose_feedback.py
-from pose_utils import ANGLE_NAMES
-from feature_extractor import vector_to_dicts
+from Model.pose_utils import ANGLE_NAMES
+from Model.feature_extractor import FeatureExtractor
 
 SIDE_EN = {"left": "left", "right": "right"}
 JOINT_LABEL_EN = {"elbow": "elbow", "shoulder": "shoulder", "knee": "knee", "hip": "hip"}
@@ -31,8 +31,8 @@ class PoseFeedback:
         return m.get(d, "Hold direction")
 
     def adverb_for_diff(self, d):
-        if d < 8: return "slightly"
-        if d < 15: return "a bit"
+        if d < (self.threshold_deg * 0.8): return "slightly"
+        if d < (self.threshold_deg * 1.5): return "a bit"
         return f"about {int(round(d))}°"
 
     def parse_joint_meta(self, name):
@@ -50,14 +50,16 @@ class PoseFeedback:
         ref_data: dict loaded from JSON with keys 'angles' and 'directions'.
         """
         # Decode user vector to dicts
-        angles_user, dirs_user = vector_to_dicts(user_vector)
+        angles_user, dirs_user = FeatureExtractor().vector_to_dicts(user_vector)
 
         # Get reference dicts directly from JSON
         angles_ref = ref_data["angles"]
         dirs_ref = ref_data["directions"]
         
         fixes = {}
+        wrongs = {}
         for name in ANGLE_NAMES:
+            flag = 0
             au, ar = angles_user.get(name), angles_ref.get(name)
             du, dr = dirs_user.get(name), dirs_ref.get(name)
             if au is None or ar is None:
@@ -70,17 +72,27 @@ class PoseFeedback:
             how_much = self.adverb_for_diff(abs_diff)
             cues = []
             if angle_instr != "Hold":
-                cues.append(f"{angle_instr} {how_much}")
+                cues.append(f"{angle_instr} your {name.replace('_', ' ')} {how_much}")
             if dir_instr != "Hold direction":
-                cues.append(f"{'and ' if cues else ''}{dir_instr.lower()} the {distal_en}")
-            if not cues:
+                cues.append(f"{'and ' if cues else ''}{dir_instr} your {side_en} {distal_en}")
+            if not cues: #alls good!
                 message = f"{side_en.capitalize()} {joint_en}: Nice form - hold it steady. Great work!"
+                flag = 1
             else:
-                message = f"{side_en.capitalize()} {joint_en}: " + " ".join(cues) + ". You've got this!"
+                message = " ".join(cues)
+            angle_diff_deg = int(round(abs_diff))
             fixes[name] = {
-                "angle_diff_deg": int(round(abs_diff)),
+                "angle_diff_deg": angle_diff_deg,
                 "angle_action": angle_instr,
                 "direction_action": dir_instr,
                 "message_en": message
             }
-        return fixes
+            if flag==0: #theres a problem
+                wrongs[name] = {
+                    "angle_diff_deg": angle_diff_deg,
+                    "angle_action": angle_instr,
+                    "direction_action": dir_instr,
+                    "message_en": message
+                }
+        #wrongs = fixes but only the problematic parts (>threshold)
+        return wrongs
