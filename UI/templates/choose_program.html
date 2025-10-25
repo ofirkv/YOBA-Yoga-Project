@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>YOBA - Workout Builder</title>
+  <link rel="stylesheet" href="../static/style_choose_program.css">
+</head>
+<body>
+  <div class="container">
+    <!-- LEFT SIDE: camera / poses selection -->
+    <section class="leftside" aria-label="Camera and poses selection">
+      <!-- existing video/canvas elements (your CSS expects these IDs) -->
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+
+      <div class="left-inner" role="region" aria-label="Pose selection overlay">
+        <h2 style="color:white; margin:0 0 6px 0;">Select Poses (up to 5)</h2>
+
+            <div class="poses-grid" id="posesGrid">
+            <div class="pose-card" data-pose-id="Ardha Chandrasana">
+                <img src="../static/art/ardha_chandrasana.jpeg" alt="Ardha Chandrasana Pose">
+            </div>
+
+            <div class="pose-card" data-pose-id="Utkata Konasana">
+                <img src="../static/art/utkata_konasana.jpeg" alt="Utkata Konasana Pose">
+            </div>
+
+            <div class="pose-card" data-pose-id="veerabhadrasana">
+                <img src="../static/art/veerabhadrasana.jpeg" alt="Veerabhadrasana Pose">
+            </div>
+
+            <div class="pose-card" data-pose-id="natarajasana">
+                <img src="../static/art/natarajasana.jpeg" alt="Natarajasana Pose">
+            </div>
+
+            <div class="pose-card" data-pose-id="Downward Dog">
+                <img src="../static/art/downward_dog.jpeg" alt="Downward Dog">
+            </div>
+            </div>
+
+
+        <!-- Selected workout list with START button -->
+        <div class="selected-container" aria-live="polite">
+          <div style="text-align:left;">
+            <div class="selected-list" id="selectedList" aria-label="Selected poses list">
+              <!-- Selected items will be appended here by JavaScript -->
+            </div>
+          </div>
+
+          <div>
+            <button id="startWorkout" class="start-btn" aria-disabled="true">START</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDE: AI auto-build panel -->
+    <aside class="rightside" aria-label="AI workout builder">
+      <div class="instr ai-panel" role="form" aria-labelledby="aiTitle">
+        <h2 id="aiTitle">Want an AI-generated workout tailored to you?</h2>
+        <p>Pick a difficulty level and we'll build a short routine</p>
+
+        <div>
+          <button class="difficulty-btn" data-difficulty="easy" id="btnEasy">Easy</button>
+          <button class="difficulty-btn" data-difficulty="medium" id="btnMedium">Medium</button>
+          <button class="difficulty-btn" data-difficulty="hard" id="btnHard">Challenge</button>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+    <script src="../static/js/script_choose_program.js"></script>
+
+</body>
+</html>

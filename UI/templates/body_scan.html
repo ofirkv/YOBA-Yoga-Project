@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Yoba - Whole Body Scan</title>
+  <link rel="stylesheet" href="../static/style.css" />
+</head>
+<body>
+<div class="container">
+  <div class="leftside">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <div id="detected-text">*Click to scan*</div>
+  </div>
+
+  <div class="rightside">
+    <div class="instr">
+      <img src="../static/art/smalllogo.png" width="400">
+      <h1>We want to make sure we see you well! </h1>
+      <button id="startBtn">Scan</button>
+    </div>
+  </div>
+</div>
+<script src="../static/js/script_body_scan.js"></script>
+</body>
+</html>

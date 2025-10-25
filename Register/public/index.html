@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YOBA • Login</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="card" role="form" aria-labelledby="title">
+      <div class="logo">
+        <div class="logo-badge">Y</div>
+        <div style="font-weight:800; letter-spacing:.3px">YOBA</div>
+      </div>
+      <h1 id="title" class="h1">Login</h1>
+      <p class="p">Welcome back to YOBA</p>
+
+      <form id="loginForm" autocomplete="on">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@yoba.fit" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" required />
+
+        <button class="btn btn-primary" type="submit">LOGIN</button>
+        <p class="small">No account? <a class="link" href="./signup.html">Create one</a></p>
+        <button id="guest" type="button" class="btn btn-ghost">Continue as Guest</button>
+        <div id="error" class="error" aria-live="polite"></div>
+      </form>
+
+      <div class="hr"></div>
+      <button class="btn btn-ghost"  id="goto-signup">Go to SIGNUP</button>
+    </section>
+  </main>
+  <script type="module" src="./js/login.js"></script>
+</body>
+</html>

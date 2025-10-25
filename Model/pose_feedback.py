@@ -7,7 +7,7 @@ JOINT_LABEL_EN = {"elbow": "elbow", "shoulder": "shoulder", "knee": "knee", "hip
 DISTAL_SEGMENT_EN = {"elbow": "forearm", "shoulder": "upper arm", "knee": "shin", "hip": "knee"}
 
 class PoseFeedback:
-    def __init__(self, threshold_deg=10.0):
+    def __init__(self, threshold_deg=30.0):
         self.threshold_deg = threshold_deg
 
     def angle_action_en(self, joint_kind, is_open):

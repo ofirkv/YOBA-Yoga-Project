@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Yoba - Train page</title>
+  <link rel="stylesheet" href="../static/style_train_page.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="leftside"> <video id="video" autoplay playsinline></video> <canvas id="canvas"
+        style="display:none;"></canvas>
+      <div id="detected-text">*Click to start*</div>
+    </div>
+    <div class="rightside">
+      <div class="instr"> <img src="{{ url_for('static', filename='art/smalllogo.png') }}" width="200">
+        <!-- Current pose info -->
+        <div id="currentPoseCard" style="margin:12px 0;"> <img id="currentPoseGif"
+            src="{{ url_for('static', filename='art/standin.gif') }}" alt="Pose GIF"
+            style="max-width:100%; height:auto;"> </div> <button id="startBtn">Start</button>
+        <!-- Selected poses list with checkmarks -->
+        <div id="posesContainer" style="margin-top:20px;">
+          <h3>Selected poses</h3>
+          <ul id="posesList" style="list-style:none; padding:0;"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../static/js/script_train_page.js"></script>
+</body>
+
+</html>

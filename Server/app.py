@@ -27,15 +27,20 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
-# Serve HTML page
+# Serve index page -> choose program by default
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("choose_program.html")
 
-# Serve ready page
-@app.route("/ready")
-def ready():
-    return render_template("ready.html")
+# Serve body scan page
+@app.route("/body_scan")
+def body_scan():
+    return render_template("body_scan.html")
+
+# Serve training page
+@app.route("/train")
+def train():
+    return render_template("train_page.html")
 
 # Receive image from JS and save skeleton
 @app.route("/upload", methods=["POST"])
@@ -104,10 +109,27 @@ def upload_image():
             ref_data = json.load(f)
 
         wrongs = feedback.compare_poses(features, ref_data)
+        print("Wrongs:", wrongs)
+
+        file_path = "data.json"
+
         if len(wrongs) > 0:
             instr = wrongs[ANGLE_NAMES[0]]["message_en"]
         else:
             instr = "Good job!"
+
+        json_data = {
+            "angles": angles,
+            "directions": directions,
+            "instructions": instr,
+            "count": len(wrongs),
+            "wrongs": wrongs
+        }
+
+        # Write JSON file
+        with open(file_path, "w") as f:
+            json.dump(json_data, f, indent=4)
+
 
         return jsonify({"status": "ok",
                         "normal": filepath_normal,
