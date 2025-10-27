@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Welcome</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../static/style_welcome.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome, {{ user_name }}!</h2>
+    <p>You're all set. Press the button below to start training.</p>
+
+    <div class="actions">
+      <a href="{{ url_for('choose_program') }}"><button type="button">Start Training</button></a>
+      <a href="{{ url_for('logout') }}"><button type="button">Logout</button></a>
+    </div>
+  </div>
+</body>
+</html>
