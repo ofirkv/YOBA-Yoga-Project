@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>Personal Data</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../static/style_personal_data.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Personal Data</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="msg">
+          {% for category, msg in messages %}
+            <div>{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('personal_data') }}">
+      <div class="row">
+        <div class="col">
+          <label for="age">Age</label>
+          <input id="age" name="age" type="number" min="1" step="1" value="{{ profile.age if profile and profile.age is not none else '' }}" />
+        </div>
+        <div class="col">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender">
+            <option value="" {% if not profile or not profile.gender %}selected{% endif %}>&nbsp;</option>
+            <option value="male" {% if profile and profile.gender=='male' %}selected{% endif %}>Male</option>
+            <option value="female" {% if profile and profile.gender=='female' %}selected{% endif %}>Female</option>
+            <option value="other" {% if profile and profile.gender=='other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label for="weight">Weight (kg)</label>
+          <input id="weight" name="weight" type="number" step="0.1" value="{{ profile.weight if profile and profile.weight is not none else '' }}" />
+        </div>
+        <div class="col">
+          <label for="height">Height (cm)</label>
+          <input id="height" name="height" type="number" step="0.1" value="{{ profile.height if profile and profile.height is not none else '' }}" />
+        </div>
+      </div>
+
+      <label for="experience_level">Experience Level</label>
+      <select id="experience_level" name="experience_level">
+        <option value="" {% if not profile or not profile.experience_level %}selected{% endif %}>&nbsp;</option>
+        <option value="beginner" {% if profile and profile.experience_level=='beginner' %}selected{% endif %}>Beginner</option>
+        <option value="intermediate" {% if profile and profile.experience_level=='intermediate' %}selected{% endif %}>Intermediate</option>
+        <option value="advanced" {% if profile and profile.experience_level=='advanced' %}selected{% endif %}>Advanced</option>
+      </select>
+
+      <label for="preferred_length">Preferred workout length (e.g. 2-5 exercises)</label>
+      <input id="preferred_length" name="preferred_length" type="text" value="{{ profile.preferred_length if profile and profile.preferred_length is not none else '' }}" />
+
+      <label>Existing injuries (choose all that apply or describe)</label>
+      <div class="injuries-list">
+        <label><input type="checkbox" name="injuries" value="back" {% if profile and profile.injuries and 'back' in profile.injuries %}checked{% endif %}> Back problems</label><br/>
+        <label><input type="checkbox" name="injuries" value="joints" {% if profile and profile.injuries and 'joints' in profile.injuries %}checked{% endif %}> Joint problems</label><br/>
+        <label><input type="checkbox" name="injuries" value="ankle" {% if profile and profile.injuries and 'ankle' in profile.injuries %}checked{% endif %}> Ankle injuries</label><br/>
+        <label><input type="checkbox" name="injuries" value="heart" {% if profile and profile.injuries and 'heart' in profile.injuries %}checked{% endif %}> Heart problems</label><br/>
+        <label><input type="checkbox" name="injuries" value="balance" {% if profile and profile.injuries and 'balance' in profile.injuries %}checked{% endif %}> Balance problems</label><br/>
+        <label for="injuries_text">Other / details</label>
+        <textarea id="injuries_text" name="injuries_text" rows="3">{{ profile.injuries if profile and profile.injuries is not none else '' }}</textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Submit</button>
+        <button type="submit" name="skip" value="1">Skip</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
