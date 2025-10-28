@@ -254,7 +254,7 @@ function capturePhoto() {
         } else {
             console.error("Pose error:", data.message);
             detectedText.className = "red";
-            detectedText.textContent = "*Server error*";
+            detectedText.textContent = "*Server error:*" + data.message ;
         }
 
     })

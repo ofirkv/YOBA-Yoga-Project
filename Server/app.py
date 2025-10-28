@@ -297,12 +297,12 @@ def upload_image():
             ref_data = json.load(f)
 
         wrongs = feedback.compare_poses(features, ref_data)
-        print("Wrongs:", wrongs)
 
         file_path = "data.json"
 
         if len(wrongs) > 0:
-            instr = wrongs[ANGLE_NAMES[0]]["message_en"]
+            first_key = list(wrongs.keys())[0]
+            instr = wrongs[first_key]["message_en"]
         else:
             instr = "Good job!"
 
@@ -317,10 +317,10 @@ def upload_image():
         with open(file_path, "w") as f:
             json.dump(json_data, f, indent=4)
 
-
         return jsonify({"status": "ok", "normal": filepath_normal, "len": len(wrongs), "msg": instr})
 
     except Exception as e:
+        print("Upload error:", str(e))
         return jsonify({"status": "error", "message": str(e)})
 
 #=== Initial Body Scan Route ===#

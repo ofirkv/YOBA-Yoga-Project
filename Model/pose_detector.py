@@ -42,7 +42,7 @@ class PoseDetector:
         results = self.pose.process(image_rgb)
 
         if not results.pose_landmarks:
-            return None, 0.0
+            return None, None, 0.0
 
         keypoints = self.extract_keypoints(results)
         confidence = np.mean(keypoints[:, 3])  # average visibility

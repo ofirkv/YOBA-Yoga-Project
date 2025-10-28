@@ -1,0 +1,56 @@
+{
+    "angles": {
+        "left_elbow_angle": 73.68932335450388,
+        "right_elbow_angle": 89.79484133864733,
+        "left_shoulder_angle": 79.60655687301512,
+        "right_shoulder_angle": 90.47269842397635,
+        "left_knee_angle": 135.52474585145455,
+        "right_knee_angle": 133.59254911976913,
+        "left_hip_angle": 131.9806094526476,
+        "right_hip_angle": 131.9515572700329
+    },
+    "directions": {
+        "left_elbow_angle": "up",
+        "right_elbow_angle": "up",
+        "left_shoulder_angle": "down",
+        "right_shoulder_angle": "down",
+        "left_knee_angle": "left",
+        "right_knee_angle": "right",
+        "left_hip_angle": "right",
+        "right_hip_angle": "left"
+    },
+    "instructions": "Straighten your left elbow angle about 17\u00b0",
+    "count": 5,
+    "wrongs": {
+        "left_elbow_angle": {
+            "angle_diff_deg": 17,
+            "angle_action": "Straighten",
+            "direction_action": "Hold direction",
+            "message_en": "Straighten your left elbow angle about 17\u00b0"
+        },
+        "left_knee_angle": {
+            "angle_diff_deg": 24,
+            "angle_action": "Bend",
+            "direction_action": "Hold direction",
+            "message_en": "Bend your left knee angle about 24\u00b0"
+        },
+        "right_knee_angle": {
+            "angle_diff_deg": 22,
+            "angle_action": "Bend",
+            "direction_action": "Hold direction",
+            "message_en": "Bend your right knee angle about 22\u00b0"
+        },
+        "left_hip_angle": {
+            "angle_diff_deg": 26,
+            "angle_action": "Close",
+            "direction_action": "Hold direction",
+            "message_en": "Close your left hip angle about 26\u00b0"
+        },
+        "right_hip_angle": {
+            "angle_diff_deg": 27,
+            "angle_action": "Close",
+            "direction_action": "Hold direction",
+            "message_en": "Close your right hip angle about 27\u00b0"
+        }
+    }
+}
