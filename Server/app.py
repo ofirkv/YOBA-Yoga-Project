@@ -243,6 +243,7 @@ def train():
 def upload_image():
     try:
         # Receive and decode image
+        current_pose_name = request.json["pose"]
         data = request.json["image"]
         img_data = base64.b64decode(data.split(",")[1])  # remove "data:image/png;base64,"
         nparr = np.frombuffer(img_data, np.uint8)
@@ -287,10 +288,7 @@ def upload_image():
         directions = compute_all_angle_directions(results)
         features = extractor.extract_features(angles, directions)
 
-        # ********
-        # !!! change automatically later !!!
-        pose_name = "utkata_konasana" 
-        # ********
+        pose_name = current_pose_name
 
         # Load reference pose (angles + directions) from JSON
         with open(f"Model/json_reference/{pose_name}_reference.json", "r") as f:
@@ -298,7 +296,7 @@ def upload_image():
 
         wrongs = feedback.compare_poses(features, ref_data)
 
-        file_path = "data.json"
+        #file_path = "data.json"
 
         if len(wrongs) > 0:
             first_key = list(wrongs.keys())[0]
@@ -306,16 +304,16 @@ def upload_image():
         else:
             instr = "Good job!"
 
-        json_data = {
-            "angles": angles,
-            "directions": directions,
-            "instructions": instr,
-            "count": len(wrongs),
-            "wrongs": wrongs
-        }
+        # json_data = {
+        #     "angles": angles,
+        #     "directions": directions,
+        #     "instructions": instr,
+        #     "count": len(wrongs),
+        #     "wrongs": wrongs
+        # }
 
-        with open(file_path, "w") as f:
-            json.dump(json_data, f, indent=4)
+        # with open(file_path, "w") as f:
+        #     json.dump(json_data, f, indent=4)
 
         return jsonify({"status": "ok", "normal": filepath_normal, "len": len(wrongs), "msg": instr})
 

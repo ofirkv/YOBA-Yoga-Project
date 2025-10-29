@@ -57,7 +57,7 @@
       </select>
 
       <label for="preferred_length">Preferred workout length (e.g. 2-5 exercises)</label>
-      <input id="preferred_length" name="preferred_length" type="text" value="{{ profile.preferred_length if profile and profile.preferred_length is not none else '' }}" />
+      <input id="preferred_length" name="preferred_length" type="number" min="2" max="5" step="1" value="{{ profile.preferred_length if profile and profile.preferred_length is not none else '' }}" />
 
       <label>Existing injuries (choose all that apply or describe)</label>
       <div class="injuries-list">

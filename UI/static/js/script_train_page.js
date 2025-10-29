@@ -203,7 +203,7 @@ function capturePhoto() {
     let dataUrl = canvas.toDataURL("image/png");
     fetch("/upload", {
         method: "POST",
-        body: JSON.stringify({ image: dataUrl }),
+        body: JSON.stringify({ image: dataUrl, pose: selectedPoses[currentIndex].toLowerCase().replace(/\s+/g, '_') }),
         headers: { "Content-Type": "application/json" }
     })
     .then(res => res.json())
