@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save selected poses to sessionStorage
     sessionStorage.setItem('selectedPoses', JSON.stringify(selectedPoses));
     // Redirect to scanning page - change path if your server uses a different route
-    window.location.href = '/body_scan'; // or 'body_scan.html' depending on your routing
+    window.location.href = '/train'; // or 'train_page.html' depending on your routing
   });
 
   updateStartButton();

@@ -1,5 +1,8 @@
-#=== Imports ===#
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
+# === Imports ===
+from flask import (
+    Flask, request, jsonify, render_template,
+    session, redirect, url_for, flash
+)
 import base64
 import cv2
 import numpy as np
@@ -13,27 +16,32 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import mysql.connector
 from mysql.connector import Error
 
-#=== Project Path Setup ===#
+# === Project Path Setup ===
 project_root = pathlib.Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-#=== Model Imports ===#
+# === Model Imports ===
 from Model.pose_detector import PoseDetector
 from Model.pose_utils import compute_all_angles, compute_all_angle_directions, ANGLE_NAMES
 from Model.feature_extractor import FeatureExtractor
 from Model.pose_feedback import PoseFeedback
 
-#=== Flask App Setup ===#
-app = Flask(__name__, template_folder="../UI/templates", static_folder="../UI/static")
+# === Flask App Setup ===
+app = Flask(
+    __name__,
+    template_folder="../UI/templates",
+    static_folder="../UI/static"
+)
 
 SAVE_DIR = "Model/Images"
 SAVE_LANDMARK_DIR = "Model/Landmarks"
 os.makedirs(SAVE_DIR, exist_ok=True)
+os.makedirs(SAVE_LANDMARK_DIR, exist_ok=True)
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
-#=== Database Configuration ===#
+# === Database Configuration ===
 DB_USER = "ofir"
 DB_PASSWORD = "OFIRKVETNY1"
 
@@ -47,7 +55,8 @@ DB_CONFIG = {
     "auth_plugin": "mysql_native_password"
 }
 
-#=== Database Connection Helper ===#
+
+# === Database Connection Helper ===
 def get_db_connection():
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
@@ -55,7 +64,8 @@ def get_db_connection():
     except Error as e:
         print("DB connection error:", e)
         return None
-    
+
+
 @app.route("/test_db")
 def test_db():
     connection = None
@@ -72,14 +82,14 @@ def test_db():
         if connection is not None and connection.is_connected():
             connection.close()
 
-#=== Routes ===#
 
-#--- Registration ---#
+# === Registration Route ===
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return render_template("register.html")  # create this template
-    # POST
+        return render_template("register.html")
+
+    # POST logic
     data = request.form
     name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
@@ -95,7 +105,6 @@ def register():
         return redirect(url_for("register"))
 
     password_hash = generate_password_hash(password)
-
     conn = get_db_connection()
     if conn is None:
         flash("Database connection error", "error")
@@ -103,12 +112,18 @@ def register():
 
     try:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s)",
-                       (name, email, password_hash))
+        cursor.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (%s, %s, %s)",
+            (name, email, password_hash)
+        )
         conn.commit()
         user_id = cursor.lastrowid
-        # create empty profile row (optional) or wait until personal_data saved
-        cursor.execute("INSERT INTO user_profile (user_id) VALUES (%s)", (user_id,))
+
+        # Create empty profile row
+        cursor.execute(
+            "INSERT INTO user_profile (user_id) VALUES (%s)",
+            (user_id,)
+        )
         conn.commit()
         cursor.close()
         conn.close()
@@ -117,6 +132,7 @@ def register():
         session["user_id"] = user_id
         session["user_name"] = name
         return redirect(url_for("personal_data"))
+
     except mysql.connector.IntegrityError:
         flash("Email already registered", "error")
         return redirect(url_for("register"))
@@ -125,15 +141,15 @@ def register():
         flash("Registration failed", "error")
         return redirect(url_for("register"))
 
-#--- Login ---#
+
+# === Login Route ===
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
-    # POST
+
     email = request.form.get("email", "").strip().lower()
     password = request.form.get("password", "")
-
     conn = get_db_connection()
     if conn is None:
         flash("Database connection error", "error")
@@ -153,22 +169,23 @@ def login():
         else:
             flash("Invalid credentials", "error")
             return redirect(url_for("login"))
+
     except Exception as e:
         print("Login error:", e)
         flash("Login failed", "error")
         return redirect(url_for("login"))
-    
-#--- Logout ---#
+
+
+# === Logout Route ===
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("index"))
 
-#=== User Profile and Personal Data Routes ===#
-#--- Personal Data ---#
+
+# === Personal Data Route ===
 @app.route("/personal_data", methods=["GET", "POST"])
 def personal_data():
-    # Require login
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("login"))
@@ -179,7 +196,6 @@ def personal_data():
         return redirect(url_for("welcome"))
 
     if request.method == "GET":
-        # fetch profile to pre-fill form if exists
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM user_profile WHERE user_id = %s", (user_id,))
         profile = cursor.fetchone()
@@ -187,7 +203,7 @@ def personal_data():
         conn.close()
         return render_template("personal_data.html", profile=profile)
 
-    # POST - save profile (or skip)
+    # POST - save profile
     form = request.form
     if form.get("skip"):
         return redirect(url_for("welcome"))
@@ -198,27 +214,29 @@ def personal_data():
     height = form.get("height") or None
     experience_level = form.get("experience_level") or None
     preferred_length = form.get("preferred_length") or None
-    # injuries can be received as comma separated values
-    injuries = form.getlist("injuries")  # if checkboxes named injuries
+    injuries = form.getlist("injuries")
     injuries_text = ",".join(injuries) if injuries else form.get("injuries_text") or None
 
     try:
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE user_profile
-            SET age=%s, gender=%s, weight=%s, height=%s, experience_level=%s, preferred_length=%s, injuries=%s
+            UPDATE user_profile SET
+                age=%s, gender=%s, weight=%s, height=%s,
+                experience_level=%s, preferred_length=%s, injuries=%s
             WHERE user_id=%s
         """, (age, gender, weight, height, experience_level, preferred_length, injuries_text, user_id))
         conn.commit()
         cursor.close()
         conn.close()
         return redirect(url_for("welcome"))
+
     except Exception as e:
         print("Save profile error:", e)
         flash("Failed to save profile", "error")
         return redirect(url_for("personal_data"))
 
-#=== Page Rendering Routes ===#
+
+# === Page Rendering Routes ===
 @app.route("/welcome")
 def welcome():
     user_name = session.get("user_name")
@@ -226,119 +244,152 @@ def welcome():
         return redirect(url_for("login"))
     return render_template("welcome.html", user_name=user_name)
 
+
 @app.route("/choose_program")
 def choose_program():
     return render_template("choose_program.html")
+
 
 @app.route("/body_scan")
 def body_scan():
     return render_template("body_scan.html")
 
+
 @app.route("/train")
 def train():
     return render_template("train_page.html")
 
-#=== Image Upload and Pose Analysis Routes ===#
-@app.route("/upload", methods=["POST"])
-def upload_image():
+
+@app.route("/score")
+def score():
+    perfect = request.args.get("perfect", 0)
+    total = request.args.get("total", 0)
+    return render_template("score.html", perfect=perfect, total=total)
+
+
+# === Image Upload & Pose Analysis ===
+@app.route("/upload_burst", methods=["POST"])
+def upload_burst():
+    # --- Initialize models ---
+    detector = PoseDetector()
+    extractor = FeatureExtractor()
+    feedback = PoseFeedback(threshold_deg=20.0)
+
     try:
-        # Receive and decode image
-        current_pose_name = request.json["pose"]
-        data = request.json["image"]
-        img_data = base64.b64decode(data.split(",")[1])  # remove "data:image/png;base64,"
-        nparr = np.frombuffer(img_data, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        pose_name = request.json["pose"]
+        images_base64 = request.json["images"]
 
-        # Save image
-        filename_normal = f"captured.png"
-        filepath_normal = os.path.join(SAVE_DIR, filename_normal)
-        cv2.imwrite(filepath_normal, img)
+        if not images_base64:
+            return jsonify({"status": "error", "message": "No images received"})
 
-        # Pose detection using MediaPipe
-        with mp_pose.Pose(static_image_mode=True) as pose:
-            results = pose.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        # --- Setup save directory ---
+        #BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        SAVE_DIR = detector.images_dir
+        os.makedirs(SAVE_DIR, exist_ok=True)
 
-            if results.pose_landmarks:
-                mp_drawing.draw_landmarks(
-                    img, results.pose_landmarks, mp_pose.POSE_CONNECTIONS
-                )
+        # --- Save images ---
+        image_paths = []
+        all_results = []
+        for i, data_url in enumerate(images_base64, start=1):
+            img_data = base64.b64decode(data_url.split(",")[1])
+            nparr = np.frombuffer(img_data, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            filepath = os.path.join(SAVE_DIR, f"captured{i}.png")
+            cv2.imwrite(filepath, img)
+            image_paths.append(filepath)
 
-        # # Save skeleton photo
-        # filename_skel = f"captured_{int(time.time())}_landmark.png"
-        # filepath_skel = os.path.join(SAVE_LANDMARK_DIR, filename_skel)
-        # cv2.imwrite(filepath_skel, img)
+            # --- Detection w mediapipe ---
+            with mp_pose.Pose(static_image_mode=True) as pose:
+                results = pose.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                if results.pose_landmarks:
+                    mp_drawing.draw_landmarks(
+                        img,
+                        results.pose_landmarks,
+                        mp_pose.POSE_CONNECTIONS
+                    )
+                all_results.append(results)
 
-        #######################################
-        ## ANALYZE PHOTO COMPARE TO XXX POSE ##
-        #######################################
-
-        # Pose analysis
-        detector = PoseDetector()
-        extractor = FeatureExtractor()
-        feedback = PoseFeedback(threshold_deg=10.0)
-
-        image_filename = f"captured.png"
-        results, keypoints, confidence = detector.detect_pose(image_filename)
-
+        # --- best indexes ---
+        current_best_confidence = 100
+        best_len = 100
+        num_of_poses = len(image_paths)
         CONFIDENCE_THRESHOLD = 0.8
-        if confidence < CONFIDENCE_THRESHOLD:
-            return jsonify({"status": "error", "message": "Low detection confidence"})
 
-        angles = compute_all_angles(results)
-        directions = compute_all_angle_directions(results)
-        features = extractor.extract_features(angles, directions)
+        best_filepath = ""
+        best_message = ""
+        best_wrongs = []
 
-        pose_name = current_pose_name
-
-        # Load reference pose (angles + directions) from JSON
-        with open(f"Model/json_reference/{pose_name}_reference.json", "r") as f:
+        # --- Load reference JSON ---
+        with open(f"../Model/json_reference/{pose_name}_reference.json", "r") as f:
             ref_data = json.load(f)
 
-        wrongs = feedback.compare_poses(features, ref_data)
+        for i in range(1, (num_of_poses+1)):
+            image_filename = f"captured{i}.png"
+            results_pose, keypoints, confidence = detector.detect_pose(image_filename)
 
-        #file_path = "data.json"
+            # --- Check confidence ---
+            if confidence < CONFIDENCE_THRESHOLD:
+                return jsonify({"status": "error", "message": "Low detection confidence"})
 
-        if len(wrongs) > 0:
-            first_key = list(wrongs.keys())[0]
-            instr = wrongs[first_key]["message_en"]
-        else:
-            instr = "Good job!"
+            # --- Compute angles and directions ---
+            angles = compute_all_angles(results_pose)
+            directions = compute_all_angle_directions(results_pose)
 
-        # json_data = {
-        #     "angles": angles,
-        #     "directions": directions,
-        #     "instructions": instr,
-        #     "count": len(wrongs),
-        #     "wrongs": wrongs
-        # }
+            # --- Extract features ---
+            features = extractor.extract_features(angles, directions)
 
-        # with open(file_path, "w") as f:
-        #     json.dump(json_data, f, indent=4)
+            # --- Compare pose with reference ---
+            wrongs = feedback.compare_poses(features, ref_data)
+            if len(wrongs) > 0:
+                first_key = list(wrongs.keys())[0]
+                instr = wrongs[first_key]["message_en"]
+            else:
+                instr = "Good job!"
 
-        return jsonify({"status": "ok", "normal": filepath_normal, "len": len(wrongs), "msg": instr})
+            if len(wrongs) < best_len or (len(wrongs) == best_len and current_best_confidence < confidence):
+                print(f"FOUND BEST AT : {i}")
+                best_len = len(wrongs)
+                best_filepath = image_paths[i-1]
+                best_wrongs = wrongs
+                best_angles = angles
+                best_directions = directions
+                best_message = instr
+                current_best_confidence = confidence
+
+        return jsonify({
+            "status": "ok",
+            "normal": best_filepath,
+            "len": best_len,
+            "msg": best_message
+        })
 
     except Exception as e:
-        print("Upload error:", str(e))
+        print("DEBUG: Detector Images folder:", detector.images_dir)
+
+        if os.path.exists(detector.images_dir):
+            print("Files in detector.Images folder:", os.listdir(detector.images_dir))
+        else:
+            print("Detector Images folder does not exist!")
+
+        print("Upload burst error:", e)
         return jsonify({"status": "error", "message": str(e)})
 
-#=== Initial Body Scan Route ===#
+# === Initial Body Scan Route ===
 @app.route("/first_scan", methods=["POST"])
 def first_scan():
     try:
         data = request.json["image"]
         img_data = base64.b64decode(data.split(",")[1])
-
         nparr = np.frombuffer(img_data, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        # Run MediaPipe Pose
+        print("Received image shape:", img.shape)
+
         with mp_pose.Pose(static_image_mode=True) as pose:
             results = pose.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-
             if not results.pose_landmarks:
                 return jsonify({"status": "error", "message": "No body detected"})
 
-            # Collect needed landmarks
             lm = results.pose_landmarks.landmark
             key_points = [
                 lm[mp_pose.PoseLandmark.LEFT_SHOULDER],
@@ -351,32 +402,32 @@ def first_scan():
                 lm[mp_pose.PoseLandmark.RIGHT_ANKLE],
             ]
 
-            # Check visibility and position (rough heuristic for full body)
             full_body = all(pt.visibility > 0.6 for pt in key_points)
-
             if not full_body:
                 return jsonify({"status": "error", "message": "Full body not visible"})
 
-            # Save normal + skeleton photo
-            filename_normal = f"firstscan_{int(time.time())}.png"
+            # Save normal + skeleton
+            filename_normal = "firstscan.png"
             filepath_normal = os.path.join(SAVE_DIR, filename_normal)
             cv2.imwrite(filepath_normal, img)
 
             mp_drawing.draw_landmarks(img, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            filename_skel = f"firstscan_{int(time.time())}_landmark.png"
-            filepath_skel = os.path.join(SAVE_DIR, filename_skel)
+
+            filename_skel = "firstscan_landmark.png"
+            filepath_skel = os.path.join(SAVE_LANDMARK_DIR, filename_skel)
             cv2.imwrite(filepath_skel, img)
 
             return jsonify({"status": "ok", "skeleton": filepath_skel})
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
-    
-#=== Index Route ===#
+
+
+# === Index & Score Routes ===
 @app.route("/")
 def index():
     return redirect(url_for("login"))
 
-#=== Run App ===#
+# === Run App ===
 if __name__ == "__main__":
     app.run(debug=True)

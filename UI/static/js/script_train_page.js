@@ -1,4 +1,4 @@
-// script_train_page.js
+//=== Variables & State ===//
 let recognition;
 let video = document.getElementById("video");
 let canvas = document.getElementById("canvas");
@@ -7,80 +7,23 @@ let detectedText = document.getElementById("detected-text");
 
 let selectedPoses = JSON.parse(sessionStorage.getItem('selectedPoses') || '[]');
 let currentIndex = 0;
-let poseStatus = []; // "pending" | "done"
-
+let poseStatus = [];       // "pending", "done", "failed"
+let poseAttempts = [];     // number of tries per pose
+const maxAttempts = 3;
 const posesListEl = document.getElementById("posesList");
-var currentPose = "standin";
 const currentPoseGif = document.getElementById("currentPoseGif");
-const ttl = document.getElementById("ttl");
+let counter = 0;
 
-// Initialize UI
-function renderPosesList() {
-    poseStatus = selectedPoses.map(() => 'pending');
-    posesListEl.innerHTML = '';
-
-    selectedPoses.forEach((p, idx) => {
-        const li = document.createElement('li');
-        li.className = 'pose-list-item';
-        li.dataset.index = idx;
-        li.style.display = "flex";
-        li.style.alignItems = "center";
-        li.style.gap = "8px";
-        li.style.marginBottom = "6px";
-
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = p;
-        nameSpan.style.flex = "1";
-        nameSpan.style.textAlign = "left";
-
-        const statusSpan = document.createElement('span');
-        statusSpan.textContent = '⏳'; // will be replaced with ✓ when done
-        statusSpan.className = 'pose-status';
-        statusSpan.style.minWidth = "20px";
-        statusSpan.style.textAlign = "right";
-
-        li.appendChild(nameSpan);
-        li.appendChild(statusSpan);
-        posesListEl.appendChild(li);
-    });
-}
-
-function updatePoseUI() {
-    if (selectedPoses.length === 0) {
-        currentPose = 'standin'; // no pose
-        currentPoseGif.src = "{{ url_for('static', filename='art/standin.gif') }}";
-        return;
-    }
-
-    const pose = selectedPoses[currentIndex];
-    currentPose = (currentIndex + 1) + '. ' + pose;
-
-    // try to set gif by convention: art/<pose_id>.gif (you can adapt names)
-    const safeName = pose.toLowerCase().replace(/\s+/g, '_');
-    currentPoseGif.src = `/static/art/${safeName}.gif`; // fallback if file missing the browser will ignore
-
-    highlightListItem(currentIndex);
-}
-
-function highlightListItem(index) {
-    Array.from(posesListEl.children).forEach((li) => {
-        if (parseInt(li.dataset.index) === index) {
-            li.style.background = 'rgba(0,0,0,0.08)';
-        } else {
-            li.style.background = 'transparent';
-        }
-
-        // update symbol
-        const statusSpan = li.querySelector('.pose-status');
-        const idx = parseInt(li.dataset.index);
-        statusSpan.textContent = poseStatus[idx] === 'done' ? '✓' : '⏳';
-    });
-}
-
-// Camera always on
+//=== Camera Setup ===//
 async function initCamera() {
     try {
-        let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        let stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: false,
+                width: { min: 1280, ideal: 1280, max: 1280 },
+                height: { min: 720, ideal: 720, max: 720 },
+                facingMode: "user"
+            });
         video.srcObject = stream;
         video.muted = true;
         video.play();
@@ -91,200 +34,251 @@ async function initCamera() {
 }
 initCamera();
 
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = false;
+//=== Instructions & Body Scan ===//
+function showInstructions() {
+    currentPoseGif.src = "/static/art/standin.gif";
+    counter++;
+    detectedText.className = "pink";
+    detectedText.textContent = counter === 1 
+        ? "Hello! We need to scan your whole body before the training starts. Are you ready?" 
+        : "Ready?";
+
+    let utterance = new SpeechSynthesisUtterance(detectedText.textContent);
+    utterance.lang = "en-US";
+    speechSynthesis.speak(utterance);
+    utterance.onend = () => startListeningBodyScan();
+}
+
+function startListeningBodyScan() {
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-    recognition.onresult = function(event) {
-        let last = event.results.length - 1;
-        let text = event.results[last][0].transcript.trim().toLowerCase();
-        detectedText.className = "yellow";
-        detectedText.textContent = text;
+    detectedText.className = "yellow";
+    detectedText.textContent = "...";
 
-        // Agreement
-        if (["yes","yeah","yep","sure","ok","okay"].some(w => text.includes(w))) {
-            capturePhoto();
-        }
+    recognition.onresult = (event) => {
+        const phrase = event.results[0][0].transcript.trim().toLowerCase();
+        detectedText.textContent = phrase;
 
-        // Stop words
-        if (["stop","no"].some(w => text.includes(w))) {
+        if (["yes","yeah","yep","sure","ok","okay","bailey","ofir","yoav","banana","okay"].some(w => phrase.includes(w))) {
+            captureBodyScan();
+        } else {
             stopListening();
         }
     };
-
-    recognition.onerror = function(event) {
-        console.error("Speech error:", event.error);
-        detectedText.className = "red";
-        detectedText.textContent = "*Error: " + event.error + "*";
-    }
+    recognition.start();
 }
 
-function startListening() {
-    if (selectedPoses.length === 0) {
-        detectedText.className = "red";
-        detectedText.textContent = "*No poses selected*";
-        return;
-    }
+function captureBodyScan() {
+    canvas.width = 640;
+    canvas.height = 480;
 
-    // start from first pending pose if not yet started
-    if (poseStatus.every(s => s === 'done')) {
-        // all done already
-        detectedText.className = "pink";
-        detectedText.textContent = "*All poses completed*";
-        return;
-    }
-
-    // find next pending if current is already done
-    if (poseStatus.length > 0 && poseStatus[currentIndex] === 'done') {
-        const next = poseStatus.indexOf('pending');
-        if (next > -1) currentIndex = next;
-    }
-
-    updatePoseUI();
-    detectedText.className = "pink";
-    detectedText.textContent = "Are you ready?";
-
-    // speak then start recognition
-    const msg = new SpeechSynthesisUtterance(detectedText.textContent);
-    msg.lang = "en-US";
-    window.speechSynthesis.speak(msg);
-    msg.onend = () => {
-        detectedText.className = "pink";
-        detectedText.textContent = "*Listening*";
-        recognition.start();
-    };
-}
-
-// startListening();
-function stopListening() {
-    if (recognition) recognition.stop();
-    detectedText.className = "gray";
-    detectedText.textContent = "*Silenced*";
-}
-
-function captureFrame() {
-    // ensure canvas size equals video
-    if (!canvas.width) {
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-    }
-
-    const videoRatio = video.videoWidth / video.videoHeight;
-    const canvasRatio = canvas.width / canvas.height;
-    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
-
-    if (canvasRatio > videoRatio) {
-        drawHeight = canvas.height;
-        drawWidth = videoRatio * drawHeight;
-        offsetX = (canvas.width - drawWidth) / 2;
-    } else {
-        drawWidth = canvas.width;
-        drawHeight = drawWidth / videoRatio;
-        offsetY = (canvas.height - drawHeight) / 2;
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
-}
-
-function capturePhoto() {
-    // mirror canvas
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
-    captureFrame();
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    stopListening();
+    console.log("Actual webcam resolution:", video.videoWidth, "x", video.videoHeight);
 
-    let dataUrl = canvas.toDataURL("image/png");
-    fetch("/upload", {
+    const dataUrl = canvas.toDataURL("image/png");
+
+    fetch("/first_scan", {
         method: "POST",
-        body: JSON.stringify({ image: dataUrl, pose: selectedPoses[currentIndex].toLowerCase().replace(/\s+/g, '_') }),
+        body: JSON.stringify({ image: dataUrl }),
         headers: { "Content-Type": "application/json" }
     })
     .then(res => res.json())
     .then(data => {
-        console.log("Saved:", data);
-        detectedText.className = "pink";
-        detectedText.textContent = "*Captured!*";
-
+        stopListening();
         if (data.status === "ok") {
-            let instr = data.msg;
-            let numWrongs = data.len;
-
-            if (numWrongs === 0) {
-                // successful for this pose
-                detectedText.textContent = "All good, Great job!";
-                const msg = new SpeechSynthesisUtterance(detectedText.textContent);
-                msg.lang = "en-US";
-                window.speechSynthesis.speak(msg);
-
-                // mark current pose done
-                poseStatus[currentIndex] = 'done';
-                highlightListItem(currentIndex);
-
-                // advance to next pending pose or finish
-                const nextPending = poseStatus.indexOf('pending');
-                if (nextPending === -1) {
-                    // finished all poses
-                    detectedText.textContent = "*Training complete!*";
-                    const doneMsg = new SpeechSynthesisUtterance("Training complete. Well done!");
-                    doneMsg.lang = "en-US";
-                    window.speechSynthesis.speak(doneMsg);
-                    // optionally redirect or show summary
-                } else {
-                    // move to next pose after short delay and prompt again
-                    currentIndex = nextPending;
-                    setTimeout(() => { startListening(); }, 1200);
-                }
-
-            } else {
-                // problem found: server returned instructions about correction
-                detectedText.textContent = "(1/" + numWrongs + ") " + instr;
-                const msg = new SpeechSynthesisUtterance(instr);
-                msg.lang = "en-US";
-                msg.onend = () => { countdownCapture(); }; // give user countdown and take next picture automatically
-                window.speechSynthesis.speak(msg);
-            }
-
+            detectedText.className = "pink";
+            detectedText.textContent = "*Body scan successful!*";
+            setupPoseList();
+            startNextPose();
         } else {
-            console.error("Pose error:", data.message);
             detectedText.className = "red";
-            detectedText.textContent = "*Server error:*" + data.message ;
+            detectedText.textContent = "*Body scan failed, click Start again*";
         }
-
     })
     .catch(err => {
-        console.error("Upload error:", err);
+        console.error("Body scan error:", err);
         detectedText.className = "red";
         detectedText.textContent = "*Upload error*";
     });
 }
 
-function countdownCapture() {
+//=== Setup Poses List ===//
+function setupPoseList() {
+    poseStatus = selectedPoses.map(() => 'pending');
+    poseAttempts = selectedPoses.map(() => 0);
+    posesListEl.innerHTML = "";
+
+    selectedPoses.forEach((p, idx) => {
+        const li = document.createElement("li");
+        li.className = "pose-list-item";
+        li.dataset.index = idx;
+        li.style.display = "flex";
+        li.style.justifyContent = "space-between";
+        li.style.marginBottom = "6px";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = p;
+
+        const statusSpan = document.createElement("span");
+        statusSpan.className = "pose-status";
+        statusSpan.textContent = "⏳";
+
+        li.appendChild(nameSpan);
+        li.appendChild(statusSpan);
+        posesListEl.appendChild(li);
+    });
+}
+
+//=== Pose Flow ===//
+function startNextPose() {
+    const nextIndex = poseStatus.indexOf("pending");
+    if (nextIndex === -1) {
+        // Training complete
+        detectedText.textContent = "*Training complete!*";
+        speechSynthesis.speak(new SpeechSynthesisUtterance("Training complete. Well done!"));
+
+        // Redirect to score
+        setTimeout(() => {
+            const perfectCount = poseStatus.filter(s => s === "done").length;
+            const totalCount = poseStatus.length;
+            sessionStorage.setItem("perfect", perfectCount);
+            sessionStorage.setItem("total", totalCount);
+            window.location.href = `/score?perfect=${perfectCount}&total=${totalCount}`;
+        }, 1500);
+        return;
+    }
+
+    currentIndex = nextIndex;
+    updateCurrentPoseUI();
+    startCountdownCapture();
+}
+
+function updateCurrentPoseUI() {
+    const pose = selectedPoses[currentIndex];
+    const safeName = pose.toLowerCase().replace(/\s+/g, "_");
+    currentPoseGif.src = `/static/art/${safeName}.gif`;
+
+    Array.from(posesListEl.children).forEach((li, idx) => {
+        li.style.background = idx === currentIndex ? "rgba(0,0,0,0.08)" : "transparent";
+        const status = poseStatus[idx];
+        const statusEl = li.querySelector(".pose-status");
+        if (status === "done") statusEl.textContent = "✓";
+        else if (status === "failed") statusEl.textContent = "✗";
+        else statusEl.textContent = "⏳";
+    });
+
+    if (poseStatus[currentIndex] === "pending") {
+        detectedText.className = "pink";
+        detectedText.textContent = `Next: ${pose}`;
+        const msg = new SpeechSynthesisUtterance(`Next exercise: ${pose}`);
+        msg.lang = "en-US";
+        speechSynthesis.speak(msg);
+    }
+}
+
+//=== Countdown & Capture ===//
+function startCountdownCapture() {
     let count = 5;
     const interval = setInterval(() => {
+        detectedText.textContent = `Capture in: ${count}`;
         detectedText.className = "gray";
-        if (count === 1) detectedText.className = "red";
-        detectedText.textContent = "*Capture in: " + count + "*";
-        const msg = new SpeechSynthesisUtterance(count.toString());
-        msg.lang = "en-US";
-        window.speechSynthesis.speak(msg);
         count--;
         if (count < 0) {
             clearInterval(interval);
-            capturePhoto(); // Take next picture
+            capturePose();
         }
     }, 1000);
 }
 
-// initial render
-renderPosesList();
-updatePoseUI();
-highlightListItem(currentIndex);
+async function capturePose() {
+    const numFrames = 9;
+    const duration = 3000; // 3 seconds total
+    const interval = duration / numFrames;
+    const images = [];
 
-document.getElementById("startBtn").onclick = startListening;
+    canvas.width = 640;
+    canvas.height = 480;
+
+    // Capture 9 frames evenly spaced across 3 seconds
+    for (let i = 0; i < numFrames; i++) {
+        detectedText.textContent = "Capturing " + (i+1) + "/" + numFrames + " photos..." ;
+        ctx.save();
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        const dataUrl = canvas.toDataURL("image/png");
+        images.push(dataUrl);
+
+        await new Promise(res => setTimeout(res, interval));
+    }
+
+    detectedText.className = "gray";
+    detectedText.textContent = "Analyzing your pose...";
+
+    // Send all images together
+    fetch("/upload_burst", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            images,
+            pose: selectedPoses[currentIndex].toLowerCase().replace(/\s+/g, "_")
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "ok") {
+            if (data.len > 0) {
+                poseAttempts[currentIndex]++;
+                detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts})`;
+                speechSynthesis.speak(new SpeechSynthesisUtterance(data.msg));
+
+                if (poseAttempts[currentIndex] >= maxAttempts) {
+                    poseStatus[currentIndex] = "failed";
+                    updateCurrentPoseUI();
+                    setTimeout(startNextPose, 1500);
+                } else {
+                    setTimeout(startCountdownCapture, 1500);
+                }
+            } else {
+                poseStatus[currentIndex] = "done";
+                updateCurrentPoseUI();
+                detectedText.textContent = "*Pose correct!*";
+                speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
+                setTimeout(startNextPose, 1000);
+            }
+        } else {
+            detectedText.className = "red";
+            detectedText.textContent = "*Server error* " + (data.message || "unknown");
+        }
+    })
+    .catch(err => {
+        console.error("Pose upload error:", err);
+        detectedText.className = "red";
+        detectedText.textContent = "*Upload error*";
+    });
+}
+
+//=== Utilities ===//
+function stopListening() { if (recognition) recognition.stop(); }
+document.getElementById("startBtn").onclick = () => {
+    const bodyScanDone = poseStatus.length > 0;
+    if (bodyScanDone) {
+        detectedText.className = "gray";
+        detectedText.textContent = "*Resuming current pose...*";
+        updateCurrentPoseUI();
+        startCountdownCapture();
+    } else {
+        showInstructions();
+    }
+};
+detectedText.textContent = "*Click Start to begin*";
