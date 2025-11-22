@@ -1,3 +1,4 @@
+# Mini-Project/data/script_help/rename_images.py
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

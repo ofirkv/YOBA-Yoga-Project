@@ -1,4 +1,4 @@
-# feature_extractor.py
+# Model/feature_extractor.py
 import numpy as np
 from Model.pose_utils import ANGLE_NAMES
 

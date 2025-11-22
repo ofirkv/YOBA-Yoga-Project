@@ -1,5 +1,4 @@
-// script_choose_program.js
-
+// UI/static/js/script_choose_program.js
 document.addEventListener('DOMContentLoaded', () => {
   const posesGrid = document.getElementById('posesGrid');
   const selectedList = document.getElementById('selectedList');

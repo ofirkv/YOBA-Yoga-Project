@@ -1,5 +1,4 @@
-// script_body_sacn.js
-
+// UI/static/js/script_body_scan.js
 let recognition;
 let video = document.getElementById("video");
 let canvas = document.getElementById("canvas");

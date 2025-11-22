@@ -1,3 +1,4 @@
+// UI/static/js/script_train_page.js
 //=== Variables & State ===//
 let recognition;
 let video = document.getElementById("video");
@@ -145,7 +146,7 @@ function captureBodyScan() {
             detectedText.className = "white";
             detectedText.textContent = "Body scan successful!";
             cornerPic.src = "/static/art/ok.png";
-            document.getElementById("mute-icon").src = "/static/art/muted.png";
+            document.getElementById("mutePlayer").src = "/static/art/muted.png";
             setupPoseList();
             startNextPose();
         } else {

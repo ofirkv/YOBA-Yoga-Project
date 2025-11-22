@@ -1,4 +1,4 @@
-# pose_feedback.py
+# Model/pose_feedback.py
 import json
 
 from Model.pose_utils import ANGLE_NAMES

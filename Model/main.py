@@ -1,3 +1,4 @@
+# Model/main.py
 import json
 from pose_detector import PoseDetector
 from pose_utils import compute_all_angles, compute_all_angle_directions

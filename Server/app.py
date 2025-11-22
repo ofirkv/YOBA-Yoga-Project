@@ -1,8 +1,6 @@
+# Server/app.py
 # === Imports ===
-from flask import (
-    Flask, request, jsonify, render_template,
-    session, redirect, url_for, flash
-)
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 import base64
 import cv2
 import numpy as np
@@ -17,8 +15,8 @@ import mysql.connector
 from mysql.connector import Error
 
 # === Project Path Setup ===
-project_root = pathlib.Path(__file__).resolve().parents[1]
-sys.path.append(str(project_root))
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parents[1]  # already calculated as project_root
+sys.path.append(str(PROJECT_ROOT))
 
 # === Model Imports ===
 from Model.pose_detector import PoseDetector
@@ -33,12 +31,16 @@ app = Flask(
     static_folder="../UI/static"
 )
 
-CONFIG_PATH = os.path.join(os.getcwd(), 'config.txt')  # keep same name
-SAVE_DIR = "Model/Images"
-SAVE_LANDMARK_DIR = "Model/Landmarks"
+# === Directories Setup ===
+CONFIG_PATH = pathlib.Path(__file__).resolve().parent / 'config.txt'
+MODEL_DIR = PROJECT_ROOT / "Model"
+SAVE_DIR = str(MODEL_DIR / "Images")
+SAVE_LANDMARK_DIR = str(MODEL_DIR / "Landmarks")
+
 os.makedirs(SAVE_DIR, exist_ok=True)
 os.makedirs(SAVE_LANDMARK_DIR, exist_ok=True)
 
+# === Mediapipe Setup ===
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
@@ -293,10 +295,6 @@ def upload_burst():
         if not images_base64:
             return jsonify({"status": "error", "message": "No images received"})
 
-        # --- Setup save directory ---
-        SAVE_DIR = detector.images_dir
-        os.makedirs(SAVE_DIR, exist_ok=True)
-
         # --- Save images ---
         image_paths = []
         for i, data_url in enumerate(images_base64, start=1):
@@ -308,8 +306,10 @@ def upload_burst():
             image_paths.append(filepath)
 
         # --- Load reference JSON ---
-        with open(f"../Model/json_reference/{pose_name}_reference.json", "r") as f:
+        json_path = PROJECT_ROOT / "Model" / "json_reference" / f"{pose_name}_reference.json"
+        with open(json_path, "r") as f:
             ref_data = json.load(f)
+
 
         # --- Initialize best variables ---
         best_len = 100

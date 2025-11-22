@@ -1,4 +1,4 @@
-// Read query params
+// UI/static/js/script_score.js
 function getQueryParams() {
     const params = {};
     location.search.slice(1).split("&").forEach(pair => {
