@@ -1,0 +1,23 @@
+{
+    "pose_name": "seated_forward_bend",
+    "angles": {
+        "left_elbow_angle": 124.503,
+        "right_elbow_angle": 137.697,
+        "left_shoulder_angle": 115.992,
+        "right_shoulder_angle": 117.517,
+        "left_knee_angle": 160.717,
+        "right_knee_angle": 154.585,
+        "left_hip_angle": 26.661,
+        "right_hip_angle": 24.165
+    },
+    "directions": {
+        "left_elbow_angle": "up",
+        "right_elbow_angle": "up",
+        "left_shoulder_angle": "down",
+        "right_shoulder_angle": "down",
+        "left_knee_angle": "up",
+        "right_knee_angle": "down",
+        "left_hip_angle": "left",
+        "right_hip_angle": "left"
+    }
+}

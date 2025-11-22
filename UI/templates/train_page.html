@@ -3,30 +3,79 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Yoba - Train page</title>
-  <link rel="stylesheet" href="../static/css/style_train_page.css" />
+  <title>Yoba - Workout Video Call</title>
+  <link rel="stylesheet" href="../static/style_train_page.css" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <div class="container">
-    <div class="leftside"> <video id="video" autoplay playsinline></video> <canvas id="canvas"
-        style="display:none;"></canvas>
-      <div id="detected-text">*Click to start*</div>
+  <div class="window">
+    <!-- Title bar -->
+    <div class="window-titlebar">
+        <img src="../static/art/phone.png" class="small-icon">
+      <span class="title">Workout Video Call</span>
+      <div class="window-buttons">
+        <span class="win-btn">-</span>
+        <span class="win-btn">□</span>
+        <span class="win-btn close">✕</span>
+      </div>
     </div>
-    <div class="rightside">
-      <div class="instr"> <img src="{{ url_for('static', filename='art/smalllogo.png') }}" width="200">
-        <!-- Current pose info -->
-        <div id="currentPoseCard" style="margin:12px 0;"> <img id="currentPoseGif"
-            src="{{ url_for('static', filename='art/standin.gif') }}" alt="Pose GIF"
-            style="max-width:100%; height:auto;"> </div> <button id="startBtn">Start</button>
-        <!-- Selected poses list with checkmarks -->
-        <div id="posesContainer" style="margin-top:20px;">
-          <ul id="posesList" style="list-style:none; padding:0;"></ul>
+
+      <div class="window-toolbar">
+        Call &nbsp;&nbsp; Recording &nbsp;&nbsp; View &nbsp;&nbsp; Tools &nbsp;&nbsp; Settings
+    </div>
+
+    <div class="window-content">
+      <!-- PLAYER LEFT SIDE -->
+      <div class="left-column">
+
+        <div class="player-section">
+          <video id="video" autoplay playsinline></video>
+          <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+
+        <div class="labels-row">
+          <div class="label">You</div>
+            <img src="../static/art/muted.png" class="mute-icon" id="mutePlayer">
+            <img src="../static/art/filmed.png" class="small-icon">
+          <img src="../static/art/wifi.png" class="small-icon">
+        </div>
+
+        <div id="detected-text" class="white">Click to Start</div>
+
+      </div>
+
+      <!-- TRAINER + POSE LIST -->
+      <div class="right-column">
+
+        <div class="trainer-and-list">
+
+          <!-- TRAINER GIF -->
+          <div class="trainer-section">
+            <div class="trainer-bg">
+              <img id="currentPoseGif" class="trainer-gif" src="{{ url_for('static', filename='art/standin.gif') }}" alt="Trainer GIF">
+            </div>
+            <div class="labels-row">
+              <div class="label">Trainer</div>
+                <img src="../static/art/muted.png" class="small-icon" id="muteTrainer">
+                <img src="../static/art/filmed.png" class="small-icon">
+              <img src="../static/art/wifi.png" class="small-icon">
+            </div>
+          </div>
+
+          <!-- POSE LIST -->
+          <ul id="posesList"></ul>
+
         </div>
       </div>
     </div>
+      <div style="display:flex;margin-bottom:30px;justify-content: center;text-align: center">
+            <button id="startBtn"></button>
+            <button id="endBtn"></button>
+        </div>
+      <img src="../static/art/empty.png" id="cornerPic" class="cornerPic">
   </div>
   <script src="../static/js/script_train_page.js"></script>
 </body>
-
 </html>

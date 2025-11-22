@@ -4,11 +4,21 @@
   <meta charset="utf-8" />
   <title>Personal Data</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="../static/css/style_personal_data.css">
+    <link rel="stylesheet" href="../static/general.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Personal Data</h2>
+  <div class="window">
+
+  <div class="titlebar">
+    Register Window
+    <div class="window-buttons">
+      <div class="win-btn" style="margin-bottom:0;">–</div>
+      <div class="win-btn" style="margin-bottom:0;">□</div>
+      <div class="win-btn close" style="margin-bottom:0;">✕</div>
+    </div>
+  </div>
+  <div class="window-content">
+    <h2 style="margin-top:0;">Personal Data</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -48,6 +58,8 @@
         </div>
       </div>
 
+    <div class="row">
+    <div class="col">
       <label for="experience_level">Experience Level</label>
       <select id="experience_level" name="experience_level">
         <option value="" {% if not profile or not profile.experience_level %}selected{% endif %}>&nbsp;</option>
@@ -55,10 +67,12 @@
         <option value="intermediate" {% if profile and profile.experience_level=='intermediate' %}selected{% endif %}>Intermediate</option>
         <option value="advanced" {% if profile and profile.experience_level=='advanced' %}selected{% endif %}>Advanced</option>
       </select>
-
-      <label for="preferred_length">Preferred workout length (e.g. 2-5 exercises)</label>
+    </div>
+    <div class="col">
+      <label for="preferred_length">Preferred workout length</label>
       <input id="preferred_length" name="preferred_length" type="number" min="2" max="5" step="1" value="{{ profile.preferred_length if profile and profile.preferred_length is not none else '' }}" />
-
+    </div>
+    </div>
       <label>Existing injuries (choose all that apply or describe)</label>
       <div class="injuries-list">
         <label><input type="checkbox" name="injuries" value="back" {% if profile and profile.injuries and 'back' in profile.injuries %}checked{% endif %}> Back problems</label><br/>
@@ -66,15 +80,16 @@
         <label><input type="checkbox" name="injuries" value="ankle" {% if profile and profile.injuries and 'ankle' in profile.injuries %}checked{% endif %}> Ankle injuries</label><br/>
         <label><input type="checkbox" name="injuries" value="heart" {% if profile and profile.injuries and 'heart' in profile.injuries %}checked{% endif %}> Heart problems</label><br/>
         <label><input type="checkbox" name="injuries" value="balance" {% if profile and profile.injuries and 'balance' in profile.injuries %}checked{% endif %}> Balance problems</label><br/>
-        <label for="injuries_text">Other / details</label>
-        <textarea id="injuries_text" name="injuries_text" rows="3">{{ profile.injuries if profile and profile.injuries is not none else '' }}</textarea>
       </div>
+    <label for="injuries_text">Other / details</label>
+    <textarea id="injuries_text" name="injuries_text" rows="3">{{ profile.injuries if profile and profile.injuries is not none else '' }}</textarea>
 
       <div class="actions">
         <button type="submit">Submit</button>
         <button type="submit" name="skip" value="1">Skip</button>
       </div>
     </form>
+  </div>
   </div>
 </body>
 </html>

@@ -1,0 +1,107 @@
+{
+  "utkata_konasana": {
+    "emphasise": "legs",
+    "elbow": "Show your arm muscles",
+    "shoulder": "Arm muscles parallel to the floor",
+    "knee": "Legs vertical to the floor",
+    "hip": "Thighs flat like a tabletop; stand proud"
+  },
+  "triangle": {
+    "emphasise": "legs",
+    "elbow": "Arms as straight and stretched as possible",
+    "shoulder": "Both arms vertical to the ground like the letter T",
+    "knee": "Legs as straight as possible",
+    "hip": "Body parallel to the ground with one of your legs up too"
+  },
+  "warrior": {
+    "emphasise": "legs",
+    "elbow": "Arms as straight and stretched as possible",
+    "shoulder": "Both hands parallel to the floor like the letter T",
+    "knee": "Crouch one leg, keep the other straight; ready to fight",
+    "hip": "Keep your back straight and strong"
+  },
+  "tree": {
+    "emphasise": "legs",
+    "elbow": "Arms rise like growing branches",
+    "shoulder": "Shoulders bended and soft like a calm breeze",
+    "knee": "Ground your standing leg like a sturdy tree trunk",
+    "hip": "Keep hips steady like the base of a rooted oak"
+  },
+  "ardha_chandrasana": {
+    "emphasise": "legs",
+    "elbow": "Reach the sun with one hand, the other straight to the floor",
+    "shoulder": "Both arms vertical to the floor like the letter T",
+    "knee": "Lift one leg like it's weightless, floating behind you",
+    "hip": "Open your hips, stand strong, body inclined to the side"
+  },
+  "natarajasana": {
+    "emphasise": "legs",
+    "elbow": "Both arms straight, one catches leg, the other reaches the horizon",
+    "shoulder": "Keep shoulders open like taking a proud bow",
+    "knee": "Kick the lifted leg back like drawing a graceful arc",
+    "hip": "Square hips forward like you're gliding on a tightrope"
+  },
+  "downward_dog": {
+    "emphasise": "all",
+    "elbow": "Arms push the ground away like you're making space",
+    "shoulder": "Let shoulders melt open like water flowing down",
+    "knee": "Straighten legs gently like stretching sleepy cats",
+    "hip": "Lift hips high like forming a perfect mountain peak"
+  },
+  "cobra": {
+    "emphasise": "all",
+    "elbow": "Arms straight, push the ground; lift up gently",
+    "shoulder": "Roll shoulders back like you're showing off a necklace",
+    "knee": "Legs long and quiet like a resting snake",
+    "hip": "Lift chest forward like a cobra rising proudly"
+  },
+  "gymnastic_bridge": {
+    "emphasise": "all",
+    "elbow": "Push through arms like you're lifting the sky",
+    "shoulder": "Open chest like a shining arc of a rainbow",
+    "knee": "Knees stay in line like the tracks of a roller coaster",
+    "hip": "Lift hips high like you're creating a glowing bridge"
+  },
+  "seated_forward_bend": {
+    "emphasise": "legs",
+    "elbow": "Let arms drape like soft ribbons, reach far from your tiptoes",
+    "shoulder": "Relax shoulders like melting butter",
+    "knee": "Stretch legs long as possible",
+    "hip": "Crouch back and head down to reach legs"
+  },
+  "lotus": {
+    "emphasise": "legs",
+    "elbow": "Rest hands like calm petals on a pond",
+    "shoulder": "Soften shoulders like you're settling into meditation",
+    "knee": "Drop knees inwards sitting calmly",
+    "hip": "Sit tall like a serene statue carved from stillness"
+  },
+  "hero": {
+    "emphasise": "legs",
+    "elbow": "Place hands gently like you're calming the air",
+    "shoulder": "Soften shoulders like you're settling into meditation",
+    "knee": "Knees close like a knight kneeling",
+    "hip": "Sink hips between heels like sitting on a cloud"
+  },
+  "plank": {
+    "emphasise": "all",
+    "elbow": "Lock in elbows like sturdy beams",
+    "shoulder": "Push shoulders away like you're rounding a strong shield",
+    "knee": "Keep legs straight like a steel bridge",
+    "hip": "Hold hips steady and your back low"
+  },
+  "boat": {
+    "emphasise": "all",
+    "elbow": "Reach arms forward like offering someone a gift",
+    "shoulder": "Shoulders relaxed but awake like you're balancing",
+    "knee": "Lift legs like floating oars",
+    "hip": "Balance on hips like you're gently rocking on water"
+  },
+  "bow": {
+    "emphasise": "all",
+    "elbow": "Arms strong pull feet back like drawing a powerful bowstring",
+    "shoulder": "Belly on floor, head rises up a bit",
+    "knee": "Kick legs up and flexed like you're trying to fly",
+    "hip": "Lift hips like a rising arc ready to launch"
+  }
+}

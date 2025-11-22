@@ -1,0 +1,547 @@
+/* ===========================
+   GLOBAL / BACKGROUND
+   =========================== */
+html, body {
+  font-family: "Trebuchet MS", Candara, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: url('./art/pinkground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* custom cursor */
+* {
+  cursor: url("./art/cursor.cur") 0 0, url("./art/cursor.png") 0 0, auto;
+}
+a:hover, button:hover, .filter-tab:hover, .pose-card, img, .tag {
+  cursor: url("./art/handcursor.cur") 0 0, url("./art/handcursor.png") 0 0, auto !important;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ===========================
+   LEFT SIDE — EXERCISE PICKER
+   =========================== */
+
+/* START BUTTON (Windows XP Green) */
+.start-btn {
+  background: #ece9d8;
+  border: 2px solid #7b7b7b;
+  border-right-color: #222;
+  border-bottom-color: #222;
+  padding: 6px 12px;
+  font-family: Tahoma, sans-serif;
+}
+
+button:active {
+  border: 2px solid #222;
+  border-right-color: #7b7b7b;
+  border-bottom-color: #7b7b7b;
+  background: #dcd8c8;
+}
+
+/* ===========================
+   RIGHT SIDE — XP AESTHETIC PANEL
+   =========================== */
+.right-side {
+  flex: 0 0 40%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Window frame */
+.config-panel {
+  width: 100%;
+  max-width: 380px;
+  border: 3px solid #000000;
+  background: #ece9d8;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 3px #5ba2ff inset,   /* blue outline */
+    8px 8px 0 #0008;           /* drop shadow */
+  padding: 0;
+  overflow: hidden;
+}
+
+/* XP title bar */
+.config-panel::before {
+  content: "Workout Config";
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+
+  background: linear-gradient(#1c74d9, #0c3d97);
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+
+  /*display: flex;*/
+  justify-content: space-between;
+  align-items: center;
+
+  /* Fake buttons */
+}
+/* Window control buttons */
+.window-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.win-btn {
+  width: 18px;
+  height: 18px;
+  background: #c0c0c0;
+  border: 1px solid white;
+  border-right-color: #666;
+  border-bottom-color: #666;
+  font-size: 12px;
+  text-align: center;
+  line-height: 18px;
+  font-weight: bold;
+  color: #222;
+  cursor: default;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+}
+
+/* slight coloring for close button */
+.win-btn.close {
+  background: linear-gradient(#ff7b7b, #ff4040);
+  color: white;
+  border-color: rgba(0,0,0,0.2);
+}
+
+/* Inside panel */
+.config-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid #cccccc;
+}
+
+.config-section h3 {
+  margin: 0 0 10px 0;
+  font-weight: bold;
+  color: #213472;
+}
+
+/* sliders */
+input[type="range"] {
+  width: 100%;
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  #canvas {
+    width: 100vw;
+  }
+}
+
+/* ===========================
+   GLOBAL / BACKGROUND
+   =========================== */
+* { box-sizing: border-box; }
+
+html, body {
+  font-family: "Trebuchet MS", Candara, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: url('./art/pinkground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow: hidden; /* prevent page scrollbars due to minor rounding */
+}
+
+/* custom cursor */
+* {
+  cursor: url("./art/cursor.cur") 0 0, url("./art/cursor.png") 0 0, auto;
+}
+input:hover {
+  cursor: url("./art/handcursor.png") 0 0, auto !important;
+}
+a:hover, button:hover {
+  cursor: url("./art/handcursor.cur") 0 0, url("./art/handcursor.png") 0 0, auto !important;
+}
+
+/* LAYOUT: container holds two panels side-by-side */
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100vw;
+  gap: 18px;
+  padding: 18px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* ===========================
+   BACKGROUND CAMERA / CANVAS (behind, won't affect layout)
+   =========================== */
+#canvas,
+#video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60vw;        /* matches left panel width */
+  height: 100vh;
+  object-fit: cover;
+  transform: scaleX(-1);
+  pointer-events: none;
+  z-index: -2;        /* keep it behind everything */
+  opacity: 0.18;      /* subtle */
+}
+
+/* ===========================
+   LEFT SIDE — the retro "window" container
+   =========================== */
+.left-side {
+  flex: 0 0 60%;
+  display: flex;
+  justify-content: flex-start;  /* left align */
+  align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  min-width: 520px;
+  max-width: 820px;
+  height: calc(100vh - 36px);    /* account for container padding */
+  overflow: visible;             /* content will scroll internally if needed */
+}
+
+/* Retro window wrapper (windows 95 box) */
+.left-window {
+  width: 100%;
+  height: 100%;
+  background: #dcdcdc;            /* old light gray */
+  border: 3px solid #000;
+  box-shadow:
+    0 0 0 3px rgba(91,162,255,0.15) inset, /* faint blue inner line (if you liked it) */
+    8px 8px 0 rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* Titlebar (HTML-defined buttons live here) */
+.left-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: linear-gradient(#e6e6e6, #bfbfbf);
+  border-bottom: 2px solid #808080;
+  font-weight: bold;
+  color: #111;
+  font-size: 14px;
+}
+
+/* Title + controls */
+.left-titlebar .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Fake window buttons (HTML elements) */
+.left-titlebar .win-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* button base: beveled old-school */
+.win-btn {
+  width: 20px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 12px;
+
+  background: linear-gradient(#f0f0f0, #bdbdbd);
+  border: 2px solid #fff;
+  border-right-color: #6b6b6b;
+  border-bottom-color: #6b6b6b;
+  color: #111;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset;
+  user-select: none;
+}
+
+/* pressed style when clicked (will visually depress with :active) */
+.win-btn:active {
+  border: 2px solid #444;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
+  transform: translateY(1px);
+}
+
+/* ===========================
+   INNER CONTENT (scrolls independently if needed)
+   =========================== */
+.left-inner {
+  padding: 12px;
+  overflow-y: auto;
+  height: calc(100% - 42px); /* leave space for titlebar */
+}
+
+/* header */
+.left-inner h2 {
+  margin: 0 0 12px 0;
+  color: #111;
+}
+
+/* ===========================
+   FILTER BAR — old-tab style checkboxes
+   =========================== */
+/* reorganized markup expects .filter-tab label > input[type=checkbox] + .tab-text */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* hide native checkbox and style label like a tab */
+.filters .filter-tab input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* tab appearance */
+.filters .filter-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: linear-gradient(#e7e7e7, #cfcfcf);
+  border: 2px solid #808080;
+  border-right-color: #2b2b2b;
+  border-bottom-color: #2b2b2b;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+  font-size: 13px;
+  user-select: none;
+}
+
+/* checked look — darker inset, like active tab */
+.filters .filter-tab input[type="checkbox"]:checked + .tab-text {
+  background: linear-gradient(#fff,#e9eefc);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 2px #9fb3ff;
+  color: #032a6b;
+}
+
+/* ensure the visible text sits above the checkbox */
+.filters .tab-text {
+  pointer-events: none;
+  display: inline-block;
+}
+
+/* small indicator dot on active */
+.filters .filter-tab input[type="checkbox"]:checked + .tab-text::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: #2b63d1;
+  vertical-align: middle;
+}
+
+/* ===========================
+   POSE GRID — simplified retro cards
+   =========================== */
+.poses-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* remove the translucent halo and heavy blur from earlier */
+.pose-card {
+  background: #f3f3f3;
+  border-radius: 6px;
+  border: 2px solid #9a9a9a;
+  padding: 8px;
+  text-align: center;
+  transition: 0.18s ease;
+  position: relative;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.35);
+  height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pose-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.45);
+}
+
+/* clean image - no white padding / halo */
+.pose-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid #7a7a7a;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+/* tag */
+.pose-card .tag {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: #bbbbbb;
+  color: #111;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid #666;
+}
+
+/* pose-card button if you keep it (hidden by default) */
+.pose-card button {
+  display: none;
+}
+
+/* ===========================
+   SELECTED LIST + START BUTTON
+   =========================== */
+.selected-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 8px;
+  background: #aeaeae;
+  border: 2px solid #888;
+  border-radius: 6px;
+}
+
+.selected-list {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1 1 auto;
+  flex-wrap: nowrap;   /* keep items on single row, allow horizontal scroll */
+  overflow-x: auto;
+  padding-bottom: 2px;
+  max-width: calc(100% - 150px);
+}
+
+.selected-item {
+  background: #fff;
+  color: #111;
+  padding: 6px 10px;
+  border: 2px solid #999;
+  border-right-color: #333;
+  border-bottom-color: #333;
+  border-radius: 4px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.selected-item .remove {
+  background: transparent;
+  border: none;
+  color: #b00;
+  font-weight: 800;
+}
+
+/* START button placed to the right but vertically centered */
+.start-btn {
+  background: #cfc5be;
+  border: 2px solid #7b7b7b;
+  border-right-color: #222;
+  border-bottom-color: #222;
+  padding: 8px 14px;
+  font-family: Tahoma, sans-serif;
+  flex: 0 0 auto;
+}
+
+/* active press look */
+.start-btn:active {
+  border: 2px solid #222;
+  border-right-color: #7b7b7b;
+  border-bottom-color: #7b7b7b;
+  background: #dcd8c8;
+}
+
+/* ===========================
+   RIGHT SIDE — your config panel (untouched)
+   =========================== */
+.right-side {
+  flex: 0 0 36%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 0;
+  overflow-y: auto;
+  min-width: 320px;
+  padding-bottom: 40px;
+}
+
+/* Keep your existing config panel styles; if any are present in your previous file they will apply.
+   (I respected your instruction not to change the config panel.) */
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 1100px) {
+  .container { gap: 12px; padding: 12px; }
+  .left-side { min-width: 420px; flex-basis: 60%; }
+  #canvas, #video { width: 100vw; }
+}
+@media (max-width: 700px) {
+  .container { flex-direction: column; align-items: stretch; height: auto; overflow: auto; padding: 12px; }
+  .left-side, .right-side { width: 100%; min-width: auto; }
+  #canvas, #video { display: none; }
+}

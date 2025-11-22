@@ -1,0 +1,23 @@
+{
+    "pose_name": "boat",
+    "angles": {
+        "left_elbow_angle": 166.996,
+        "right_elbow_angle": 160.489,
+        "left_shoulder_angle": 52.925,
+        "right_shoulder_angle": 46.362,
+        "left_knee_angle": 172.702,
+        "right_knee_angle": 172.796,
+        "left_hip_angle": 75.388,
+        "right_hip_angle": 78.04
+    },
+    "directions": {
+        "left_elbow_angle": "up",
+        "right_elbow_angle": "up",
+        "left_shoulder_angle": "left",
+        "right_shoulder_angle": "left",
+        "left_knee_angle": "left",
+        "right_knee_angle": "left",
+        "left_hip_angle": "up",
+        "right_hip_angle": "up"
+    }
+}

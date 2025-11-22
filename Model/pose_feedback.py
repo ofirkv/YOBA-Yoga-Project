@@ -1,14 +1,22 @@
 # pose_feedback.py
+import json
+
 from Model.pose_utils import ANGLE_NAMES
 from Model.feature_extractor import FeatureExtractor
+import os
+
+METAPHORICAL_INSTR_PATH = os.path.join(os.path.dirname(__file__), "..", "Server", "metaphorical_instructions.json")
 
 SIDE_EN = {"left": "left", "right": "right"}
 JOINT_LABEL_EN = {"elbow": "elbow", "shoulder": "shoulder", "knee": "knee", "hip": "hip"}
 DISTAL_SEGMENT_EN = {"elbow": "forearm", "shoulder": "upper arm", "knee": "shin", "hip": "knee"}
 
 class PoseFeedback:
-    def __init__(self, threshold_deg=30.0):
+    def __init__(self, threshold_deg=30.0, instructions_config="numerical", emphasises="all", pose_name="hero"):
         self.threshold_deg = threshold_deg
+        self.instructions_config = instructions_config
+        self.pose_name = pose_name
+        self.emphasises = emphasises
 
     def angle_action_en(self, joint_kind, is_open):
         if joint_kind in ("elbow", "knee"):
@@ -49,6 +57,9 @@ class PoseFeedback:
         user_vector: np.array with angles+directions from FeatureExtractor.
         ref_data: dict loaded from JSON with keys 'angles' and 'directions'.
         """
+        with open(METAPHORICAL_INSTR_PATH, "r") as f:
+            METAPHORICAL_INSTR = json.load(f)
+
         # Decode user vector to dicts
         angles_user, dirs_user = FeatureExtractor().vector_to_dicts(user_vector)
 
@@ -72,9 +83,15 @@ class PoseFeedback:
             how_much = self.adverb_for_diff(abs_diff)
             cues = []
             if angle_instr != "Hold":
-                cues.append(f"{angle_instr} your {name.replace('_', ' ')} {how_much}")
+                if self.instructions_config == "goal":
+                    cues.append(f"{angle_instr} your {name.replace('_', ' ')} to {ar}°")
+                else:
+                    cues.append(f"{angle_instr} your {name.replace('_', ' ')} {how_much}")
             if dir_instr != "Hold direction":
-                cues.append(f"{'and ' if cues else ''}{dir_instr} your {side_en} {distal_en}")
+                if self.instructions_config == "goal":
+                    cues.append(f"{'and ' if cues else ''}{dir_instr} your {side_en} {distal_en}")
+                else:
+                    cues.append(f"{'and ' if cues else ''}your {side_en} {distal_en} needs to look {dr}wards")
             if not cues: #alls good!
                 message = f"{side_en.capitalize()} {joint_en}: Nice form - hold it steady. Great work!"
                 flag = 1
@@ -87,7 +104,14 @@ class PoseFeedback:
                 "direction_action": dir_instr,
                 "message_en": message
             }
-            if flag==0: #theres a problem
+            if flag == 0 and (self.emphasises == "all"
+                              or (self.emphasises == "specific"
+                              and METAPHORICAL_INSTR[self.pose_name]["emphasise"] == "legs"
+                              and (joint_en == "knee" or joint_en == "hip"))): # there is a problem
+
+                if self.instructions_config == "metaphorical":
+                    message = METAPHORICAL_INSTR[self.pose_name][joint_en]
+
                 wrongs[name] = {
                     "angle_diff_deg": angle_diff_deg,
                     "angle_action": angle_instr,

@@ -1,0 +1,23 @@
+{
+    "pose_name": "bow",
+    "angles": {
+        "left_elbow_angle": 161.973,
+        "right_elbow_angle": 170.128,
+        "left_shoulder_angle": 61.007,
+        "right_shoulder_angle": 70.465,
+        "left_knee_angle": 90.798,
+        "right_knee_angle": 88.862,
+        "left_hip_angle": 106.843,
+        "right_hip_angle": 105.434
+    },
+    "directions": {
+        "left_elbow_angle": "up",
+        "right_elbow_angle": "up",
+        "left_shoulder_angle": "left",
+        "right_shoulder_angle": "left",
+        "left_knee_angle": "right",
+        "right_knee_angle": "right",
+        "left_hip_angle": "up",
+        "right_hip_angle": "up"
+    }
+}

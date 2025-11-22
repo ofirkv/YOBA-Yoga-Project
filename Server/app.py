@@ -33,6 +33,7 @@ app = Flask(
     static_folder="../UI/static"
 )
 
+CONFIG_PATH = os.path.join(os.getcwd(), 'config.txt')  # keep same name
 SAVE_DIR = "Model/Images"
 SAVE_LANDMARK_DIR = "Model/Landmarks"
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -259,37 +260,45 @@ def body_scan():
 def train():
     return render_template("train_page.html")
 
-
-@app.route("/score")
-def score():
-    perfect = request.args.get("perfect", 0)
-    total = request.args.get("total", 0)
-    return render_template("score.html", perfect=perfect, total=total)
-
-
 # === Image Upload & Pose Analysis ===
 @app.route("/upload_burst", methods=["POST"])
 def upload_burst():
-    # --- Initialize models ---
-    detector = PoseDetector()
-    extractor = FeatureExtractor()
-    feedback = PoseFeedback(threshold_deg=20.0)
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, 'r') as f:
+            data_config = json.load(f)
+
+    LEFT_RIGHT_MAP = {
+        "left": "right",
+        "Left": "Right",
+        "right": "left",
+        "Right": "Left"
+    }
+
+    def flip_left_right(text: str) -> str:
+        """Swap left/right words in instruction text."""
+        for k, v in LEFT_RIGHT_MAP.items():
+            text = text.replace(k, v)
+        return text
 
     try:
         pose_name = request.json["pose"]
         images_base64 = request.json["images"]
 
+        # --- Initialize models ---
+        detector = PoseDetector()
+        extractor = FeatureExtractor()
+        feedback = PoseFeedback(threshold_deg=20.0, instructions_config=data_config["instructions"],
+                                emphasises=data_config["emphasises"], pose_name=pose_name)
+
         if not images_base64:
             return jsonify({"status": "error", "message": "No images received"})
 
         # --- Setup save directory ---
-        #BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         SAVE_DIR = detector.images_dir
         os.makedirs(SAVE_DIR, exist_ok=True)
 
         # --- Save images ---
         image_paths = []
-        all_results = []
         for i, data_url in enumerate(images_base64, start=1):
             img_data = base64.b64decode(data_url.split(",")[1])
             nparr = np.frombuffer(img_data, np.uint8)
@@ -298,79 +307,83 @@ def upload_burst():
             cv2.imwrite(filepath, img)
             image_paths.append(filepath)
 
-            # --- Detection w mediapipe ---
-            with mp_pose.Pose(static_image_mode=True) as pose:
-                results = pose.process(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                if results.pose_landmarks:
-                    mp_drawing.draw_landmarks(
-                        img,
-                        results.pose_landmarks,
-                        mp_pose.POSE_CONNECTIONS
-                    )
-                all_results.append(results)
-
-        # --- best indexes ---
-        current_best_confidence = 100
-        best_len = 100
-        num_of_poses = len(image_paths)
-        CONFIDENCE_THRESHOLD = 0.8
-
-        best_filepath = ""
-        best_message = ""
-        best_wrongs = []
-
         # --- Load reference JSON ---
         with open(f"../Model/json_reference/{pose_name}_reference.json", "r") as f:
             ref_data = json.load(f)
 
-        for i in range(1, (num_of_poses+1)):
-            image_filename = f"captured{i}.png"
-            results_pose, keypoints, confidence = detector.detect_pose(image_filename)
+        # --- Initialize best variables ---
+        best_len = 100
+        current_best_confidence = 0
+        best_filepath = ""
+        best_wrongs = {}
+        best_message = ""
+        best_angles = None
+        best_directions = None
 
-            # --- Check confidence ---
-            if confidence < CONFIDENCE_THRESHOLD:
-                return jsonify({"status": "error", "message": "Low detection confidence"})
+        CONFIDENCE_THRESHOLD = 0.8
 
-            # --- Compute angles and directions ---
-            angles = compute_all_angles(results_pose)
-            directions = compute_all_angle_directions(results_pose)
+        # --- Process each image ---
+        for i, filepath in enumerate(image_paths):
+            img = cv2.imread(filepath)
 
-            # --- Extract features ---
-            features = extractor.extract_features(angles, directions)
+            # Prepare both normal and mirrored versions
+            versions = {
+                "normal": img,
+                "mirrored": cv2.flip(img, 1)  # horizontal flip
+            }
 
-            # --- Compare pose with reference ---
-            wrongs = feedback.compare_poses(features, ref_data)
-            if len(wrongs) > 0:
-                first_key = list(wrongs.keys())[0]
-                instr = wrongs[first_key]["message_en"]
-            else:
-                instr = "Good job!"
+            for version_name, version_img in versions.items():
+                # --- Detect pose ---
+                if version_name == "mirrored":
+                    # Save mirrored image to disk
+                    mirrored_path = os.path.join(SAVE_DIR, f"captured{(i+1)}_mirrored.png")
+                    cv2.imwrite(mirrored_path, version_img)
+                    detect_path = mirrored_path
+                else:
+                    detect_path = filepath  # normal image path
 
-            if len(wrongs) < best_len or (len(wrongs) == best_len and current_best_confidence < confidence):
-                print(f"FOUND BEST AT : {i}")
-                best_len = len(wrongs)
-                best_filepath = image_paths[i-1]
-                best_wrongs = wrongs
-                best_angles = angles
-                best_directions = directions
-                best_message = instr
-                current_best_confidence = confidence
+                results_pose, keypoints, confidence = detector.detect_pose(detect_path)
+
+                if confidence < CONFIDENCE_THRESHOLD:
+                    continue  # skip low-confidence images
+
+                # --- Compute angles and directions ---
+                angles = compute_all_angles(results_pose)
+                directions = compute_all_angle_directions(results_pose)
+
+                # --- Extract features ---
+                features = extractor.extract_features(angles, directions)
+
+                # --- Compare pose with reference ---
+                wrongs = feedback.compare_poses(features, ref_data)
+
+                # --- Prepare instruction message ---
+                if len(wrongs) > 0:
+                    first_key = list(wrongs.keys())[0]
+                    instr = wrongs[first_key]["message_en"]
+                else:
+                    instr = "Good job!"
+
+                # --- Flip instructions if mirrored ---
+                if version_name == "mirrored":
+                    instr = flip_left_right(instr)
+
+                # --- Update best if necessary ---
+                if len(wrongs) < best_len or (len(wrongs) == best_len and confidence > current_best_confidence):
+                    best_len = len(wrongs)
+                    best_wrongs = wrongs
+                    best_angles = angles
+                    best_directions = directions
+                    best_message = instr
+                    current_best_confidence = confidence
 
         return jsonify({
             "status": "ok",
-            "normal": best_filepath,
             "len": best_len,
             "msg": best_message
         })
 
     except Exception as e:
-        print("DEBUG: Detector Images folder:", detector.images_dir)
-
-        if os.path.exists(detector.images_dir):
-            print("Files in detector.Images folder:", os.listdir(detector.images_dir))
-        else:
-            print("Detector Images folder does not exist!")
-
         print("Upload burst error:", e)
         return jsonify({"status": "error", "message": str(e)})
 
@@ -427,6 +440,31 @@ def first_scan():
 @app.route("/")
 def index():
     return redirect(url_for("login"))
+
+
+@app.route("/score")
+def score():
+    perfect = request.args.get("perfect", 0)
+    total = request.args.get("total", 0)
+    return render_template("score.html", perfect=perfect, total=total)
+
+@app.route('/save_config', methods=['POST'])
+def save_config():
+    data = request.get_json()
+    # Save as JSON
+    with open(CONFIG_PATH, 'w') as f:
+        json.dump(data, f, indent=2)
+    return jsonify({"status": "success"})
+
+# NEW: serve the config file as JSON for JS
+@app.route('/get_config', methods=['GET'])
+def get_config():
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, 'r') as f:
+            data = json.load(f)
+        return jsonify(data)
+    else:
+        return jsonify({"error": "Config not found"}), 404
 
 # === Run App ===
 if __name__ == "__main__":

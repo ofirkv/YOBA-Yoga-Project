@@ -1,0 +1,23 @@
+{
+    "pose_name": "gymnastic_bridge",
+    "angles": {
+        "left_elbow_angle": 159.939,
+        "right_elbow_angle": 157.845,
+        "left_shoulder_angle": 157.327,
+        "right_shoulder_angle": 159.805,
+        "left_knee_angle": 126.371,
+        "right_knee_angle": 120.488,
+        "left_hip_angle": 100.369,
+        "right_hip_angle": 104.003
+    },
+    "directions": {
+        "left_elbow_angle": "right",
+        "right_elbow_angle": "right",
+        "left_shoulder_angle": "right",
+        "right_shoulder_angle": "right",
+        "left_knee_angle": "left",
+        "right_knee_angle": "left",
+        "left_hip_angle": "down",
+        "right_hip_angle": "down"
+    }
+}

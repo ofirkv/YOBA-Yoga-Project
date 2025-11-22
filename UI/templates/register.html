@@ -4,11 +4,23 @@
   <meta charset="utf-8" />
   <title>Register</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="../static/css/style_register.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
+  <link rel="stylesheet" href="../static/general.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Register</h2>
+  <div class="window">
+
+  <div class="titlebar">
+    Register Window
+    <div class="window-buttons">
+      <div class="win-btn" style="margin-bottom:0;">–</div>
+      <div class="win-btn" style="margin-bottom:0;">□</div>
+      <div class="win-btn close" style="margin-bottom:0;">✕</div>
+    </div>
+  </div>
+
+  <div class="window-content">
+    <h2 style="margin-top:0;">Register</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -38,6 +50,7 @@
         <a href="{{ url_for('login') }}">Back to Login</a>
       </div>
     </form>
+  </div>
   </div>
 </body>
 </html>

@@ -1,0 +1,6 @@
+{
+  "instructions": "metaphorical",
+  "attempts": "3",
+  "time": "5",
+  "emphasises": "all"
+}

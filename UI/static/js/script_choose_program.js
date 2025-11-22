@@ -4,18 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const posesGrid = document.getElementById('posesGrid');
   const selectedList = document.getElementById('selectedList');
   const startBtn = document.getElementById('startWorkout');
-  const maxPoses = 5;
+  const filters = document.querySelectorAll('.cat-filter');
 
+  const maxPoses = 5;
   let selectedPoses = [];
 
+  // ---------------------------
+  // Enable/disable START button
+  // ---------------------------
   function updateStartButton() {
-    startBtn.disabled = selectedPoses.length === 0;
-    startBtn.style.opacity = selectedPoses.length === 0 ? 0.5 : 1;
+    const disabled = selectedPoses.length === 0;
+    startBtn.disabled = disabled;
+    startBtn.style.opacity = disabled ? 0.5 : 1;
   }
 
+  // ---------------------------
+  // Add pose to list
+  // ---------------------------
   function addPose(poseId) {
     if (selectedPoses.length >= maxPoses) {
-      alert(`You can select up to ${maxPoses} poses only.`);
+      alert(`You can select up to ${maxPoses}`);
       return;
     }
 
@@ -30,9 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeBtn = document.createElement('button');
     removeBtn.classList.add('remove');
     removeBtn.textContent = 'X';
+
     removeBtn.addEventListener('click', () => {
-      const index = selectedPoses.indexOf(poseId);
-      if (index > -1) selectedPoses.splice(index, 1);
+      selectedPoses = selectedPoses.filter(p => p !== poseId);
       item.remove();
       updateStartButton();
     });
@@ -44,21 +52,81 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStartButton();
   }
 
+  // ---------------------------
+  // Pose card click
+  // ---------------------------
   posesGrid.addEventListener('click', (e) => {
     const card = e.target.closest('.pose-card');
     if (!card) return;
-    const poseId = card.dataset.poseId;
-    addPose(poseId);
+    addPose(card.dataset.poseId);
   });
 
-  // START button handler: save list to sessionStorage and go to body scan page
+  // ---------------------------
+  // CATEGORY FILTERING
+  // ---------------------------
+  function filterPoses() {
+    const activeCategories = [...filters]
+      .filter(f => f.checked)
+      .map(f => f.value);
+
+    document.querySelectorAll('.pose-card').forEach(card => {
+      const cat = card.dataset.category;
+      card.style.display = activeCategories.includes(cat) ? 'block' : 'none';
+    });
+  }
+
+  filters.forEach(filter => filter.addEventListener('change', filterPoses));
+
+  // initialize
+  filterPoses();
+  updateStartButton();
+
+  // ---------------------------
+  // START BUTTON
+  // ---------------------------
   startBtn.addEventListener('click', () => {
     if (selectedPoses.length === 0) return;
-    // Save selected poses to sessionStorage
+
     sessionStorage.setItem('selectedPoses', JSON.stringify(selectedPoses));
-    // Redirect to scanning page - change path if your server uses a different route
-    window.location.href = '/train'; // or 'train_page.html' depending on your routing
+    window.location.href = '/train';
   });
 
-  updateStartButton();
+});
+
+// SAVE CONFIGURATION
+const attemptsSlider = document.getElementById('attemptsSlider');
+const attemptsValue = document.getElementById('attemptsValue');
+const timeSlider = document.getElementById('timeSlider');
+const timeValue = document.getElementById('timeValue');
+
+// Update slider labels
+attemptsSlider.addEventListener('input', () => attemptsValue.textContent = attemptsSlider.value);
+timeSlider.addEventListener('input', () => timeValue.textContent = timeSlider.value);
+
+// Hide/show attempts slider based on infinity option
+document.querySelectorAll('input[name="attemptsOption"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    attemptsSlider.style.display = radio.value === 'bar' ? 'block' : 'none';
+    attemptsValue.style.display = radio.value === 'bar' ? 'inline' : 'none';
+  });
+});
+
+// SAVE CONFIG — send to server
+document.getElementById('saveConfigBtn').addEventListener('click', () => {
+  const instructions = document.querySelector('input[name="instructions"]:checked').value;
+  const attemptsOption = document.querySelector('input[name="attemptsOption"]:checked').value;
+  const attempts = attemptsOption === 'bar' ? attemptsSlider.value : 'infinity';
+  const time = timeSlider.value;
+  const emphasises = document.querySelector('input[name="emphasises"]:checked').value;
+
+  const configData = { instructions, attempts, time, emphasises };
+
+  fetch('/save_config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(configData)
+  })
+  .then(res => res.json())
+  .then(data => alert('Config saved!'))
+  .catch(err => alert('Error saving config'));
 });

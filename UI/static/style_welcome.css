@@ -1,0 +1,355 @@
+/* ---------------------------
+   Global & Background
+   --------------------------- */
+html, body {
+  font-family: "Tahoma", "Trebuchet MS", Candara, sans-serif; /* windows XP style for UI */
+  margin: 0px;
+  padding: 0;
+  height: 100%;
+  background: url('./art/grayground.png');
+  background-position: center;
+  color: #111;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-shadow:
+    0 0 0 5px #aeaeae inset
+}
+
+/* Custom cursors (relative from CSS file: static/style_welcome.css -> ../static/art/... )
+   Keep these files in static/art/ */
+* {
+  cursor: url("../static/art/cursor.cur") 0 0, url("../static/art/cursor.png") 0 0, auto;
+}
+button:hover, a:hover {
+  cursor: url("../static/art/handcursor.cur") 0 0, url("../static/art/handcursor.png") 0 0, auto !important;
+}
+
+/* ---------------------------
+   Top Menu Bar (decorative)
+   --------------------------- */
+.top-menu {
+  width: 100%;
+  background: linear-gradient(#aeaeae, #9e9e9e);
+  padding: 6px 16px;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  /*box-shadow: inset 0 -2px 4px rgba(0,0,0,0.25);*/
+  border-bottom: 1px solid #6e6e6e;
+  font-size: 14px;
+}
+
+.top-menu .menu-items span {
+  margin-right: 18px;
+  color: #505050;
+  letter-spacing: 0.6px;
+}
+
+.top-menu .menu-right .mini-clock {
+  font-size: 12px;
+  color: #505050;
+  opacity: 0.9;
+}
+
+/* ---------------------------
+   Layout grid
+   --------------------------- */
+.page-wrap {
+  padding: 18px;
+}
+
+.page-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ---------------------------
+   Retro Window base styles
+   (Win95/98 bevel: light top/right, dark bottom/left)
+   --------------------------- */
+.retro-window {
+  position: relative;
+  background: linear-gradient(180deg, #cccccc, #a6a6a6);
+  padding: 12px;
+  /* We'll fake the light/dark bevel using multiple outlines and inset shadows */
+  border-radius: 5px;
+  border-top: 3px solid #dcdcdc;
+  border-right: 3px solid #dcdcdc;
+  border-bottom: 3px solid #444;
+  border-left: 3px solid #444;
+  overflow: hidden;
+  color: #4e4e4e;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.25);;
+}
+.retro-window2 {
+  position: relative;
+  background: transparent;
+  padding: 18px 14px;
+  overflow: hidden;
+}
+
+/* explicit pixel-like bevel for Win95 feel */
+.retro-window::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  border-top: 2px solid #f6f6f6;    /* light */
+  border-left: 2px solid #f6f6f6;   /* light */
+  border-bottom: 2px solid #4a4a4a; /* dark */
+  border-right: 2px solid #4a4a4a;  /* dark */
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* title for retro windows */
+.retro-window .retro-title {
+  font-weight: bold;
+  font-size: 14px;
+  padding: 6px 8px;
+  background: transparent;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  color: #777777;
+  border: 2px solid #a5a5a5;
+}
+
+/* ---------------------------
+   Stats Panel (left) - Win98 style
+   --------------------------- */
+.stats-panel {
+  min-height: 220px;
+}
+
+.stats-content {
+  padding: 6px 6px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* logout button (dark blue plastic) */
+.logout-btn {
+  display: block;
+  margin: 14px auto 4px auto;
+  width: 100px;
+  height: 20px;
+  padding: 12px;
+  text-align: center;
+  background: linear-gradient(#e31b3a, #8e1111);
+  color: #000000;
+  border-top: 1px solid #5e5e5e;
+  border-left: 1px solid #5e5e5e;
+  border-bottom: 1px solid #323232;
+  border-right: 1px solid #323232;
+  text-decoration: none;
+  font-weight: 200;
+  font-size: 20px;
+}
+
+.logout-btn:hover {
+  filter: brightness(0.8);
+}
+
+/* ---------------------------
+   CENTER - Logo / Start
+   --------------------------- */
+.center-column {
+  text-align: center;
+}
+
+/* bigger logo */
+.logo-img {
+  width: 400px;
+  height: auto;
+  margin: 10px auto 6px;
+  display: block;
+  image-rendering: pixelated;     /* pixelated vibe */
+  image-rendering: crisp-edges;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+/* slogan under logo (Win98 / MS Sans Serif style) */
+.tagline {
+  margin-top: 10px;
+  font-family: "Segoe UI", "Verdana", sans-serif;  /* MS-sans-like as requested */
+  font-size: 20px;
+  color: #111;
+}
+
+/* ---------------------------
+   Start Button - Pixel (Press Start 2P)
+   --------------------------- */
+.start-btn {
+  display: inline-block;
+  margin: 28px auto;
+  padding: 18px 34px;
+  text-decoration: none;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.25);
+  transition: transform 0.12s ease, filter 0.12s ease;
+  border: 2px solid rgba(255,255,255,0.12);
+  border-bottom: 2px solid black;
+}
+
+/* pixel font variant */
+.start-btn.pixel {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(#5398fa, #2468b6);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+/* hover */
+.start-btn.pixel:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.2);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.17);
+}
+
+/* ---------------------------
+   RIGHT COLUMN
+   --------------------------- */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------------------------
+   Config Panel (XP style window)
+   --------------------------- */
+.config-panel {
+  width: 100%;
+  max-width: 420px;
+  border: 3px solid black;
+  border-radius: 5px;
+  background: #ece9d8;
+  padding: 0;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 5px #5ba2ff inset,   /* inner blue outline */
+    10px 10px 0 rgba(0,0,0,0.25);
+}
+
+/* XP title bar */
+.xp-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: linear-gradient(#1c74d9, #0c3d97);
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+/* title text */
+.xp-title-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* window control buttons */
+.window-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* small fake chrome buttons */
+.win-btn {
+  width: 18px;
+  height: 18px;
+  background: #c0c0c0;
+  border: 1px solid white;
+  border-right-color: #666;
+  border-bottom-color: #666;
+  font-size: 12px;
+  text-align: center;
+  line-height: 18px;
+  font-weight: bold;
+  color: #222;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+}
+
+/* slight coloring for close button */
+.win-btn.close {
+  background: linear-gradient(#ff7b7b, #ff4040);
+  color: white;
+  border-color: rgba(0,0,0,0.2);
+}
+
+/* body of xp window */
+.config-body {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #222;
+  line-height: 1.45;
+}
+
+/* small list visuals */
+.config-body ul {
+  padding-left: 18px;
+}
+
+/* ---------------------------
+   Ad box
+   --------------------------- */
+.ad-box .ad-img {
+  width: 100%;
+  border-radius: 6px;
+  display: block;
+  margin-top: 8px;
+  border: 2px solid #dedede;
+}
+
+/* ---------------------------
+   Marquee bar (red)
+   --------------------------- */
+.marquee-bar {
+  background: #2228a1;
+  padding: 12px 0;
+  border-bottom: 3px solid #000000;
+  margin-top: 14px;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+
+  position: absolute;
+  bottom: 20px;  /* distance from bottom */
+}
+
+.marquee-bar marquee {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ffe300;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+}
+/* ---------------------------
+   Responsive tweaks
+   --------------------------- */
+@media (max-width: 980px) {
+  .page-container {
+    grid-template-columns: 1fr;
+  }
+
+  .marquee-bar {
+    font-size: 14px;
+  }
+
+  .logo-img {
+    width: 180px;
+  }
+
+  .start-btn.pixel {
+    width: 90%;
+    box-sizing: border-box;
+  }
+}

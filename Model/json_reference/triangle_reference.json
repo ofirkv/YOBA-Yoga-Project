@@ -1,0 +1,23 @@
+{
+    "pose_name": "triangle",
+    "angles": {
+        "left_elbow_angle": 173.365,
+        "right_elbow_angle": 173.973,
+        "left_shoulder_angle": 118.49,
+        "right_shoulder_angle": 95.711,
+        "left_knee_angle": 173.209,
+        "right_knee_angle": 173.457,
+        "left_hip_angle": 134.926,
+        "right_hip_angle": 64.989
+    },
+    "directions": {
+        "left_elbow_angle": "left",
+        "right_elbow_angle": "left",
+        "left_shoulder_angle": "right",
+        "right_shoulder_angle": "down",
+        "left_knee_angle": "left",
+        "right_knee_angle": "left",
+        "left_hip_angle": "left",
+        "right_hip_angle": "left"
+    }
+}

@@ -4,17 +4,118 @@
   <meta charset="utf-8" />
   <title>Welcome</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="../static/css/style_welcome.css">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
+
+  <!-- Pixel font for Start button -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- System fonts for windows / slogan (Tahoma / Segoe UI fallback) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style_welcome.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome, {{ user_name }}!</h2>
-    <p>You're all set. Press the button below to start training.</p>
 
-    <div class="actions">
-      <a href="{{ url_for('choose_program') }}"><button type="button">Start Training</button></a>
-      <a href="{{ url_for('logout') }}"><button type="button">Logout</button></a>
+  <!-- TOP MENU (decorative) -->
+  <div class="top-menu">
+    <div class="menu-items">
+      <span>File</span>
+      <span>Tools</span>
+      <span>View</span>
+      <span>Settings</span>
+      <span>Help</span>
+    </div>
+
+    <div class="menu-right">
+      <span class="mini-clock">‏{{ current_time if current_time is defined else "" }}</span>
     </div>
   </div>
+
+  <div class="page-wrap">
+    <div class="page-container">
+
+      <!-- LEFT: Player Stats  (Win98 bevel) -->
+      <aside class="retro-window stats-panel">
+        <div class="retro-title">STATS</div>
+
+        <div class="stats-content">
+          <p><strong>Hello, </strong> {{ user_name }}</p>
+          <p><strong>Current Score: </strong> {{ last_score }}</p>
+          <p><strong>Best Score: </strong> {{ max_score }}</p>
+        </div>
+
+        <a class="logout-btn" href="{{ url_for('logout') }}">Logout</a>
+      </aside>
+
+      <!-- CENTER COLUMN -->
+      <main class="center-column">
+
+        <!-- Logo window (bigger, pixelated) -->
+        <section class="retro-window2">
+          <!-- Logo image loaded via Flask static -->
+          <img
+            src="{{ url_for('static', filename='art/smallicon.png') }}"
+            alt="logo"
+            class="logo-img"/>
+
+          <!-- Slogan (Windows98 style font—Segoe/ Verdana fallback) -->
+          <p class="tagline" style="font-weight: bolder">Your Personal Yoga Trainer</p>
+        </section>
+
+        <!-- START button (pixel font) -->
+        <a class="start-btn pixel" href="{{ url_for('choose_program') }}">START TRAINING</a>
+
+      </main>
+
+      <!-- RIGHT: About (XP style) + Ad (Win98 bevel) -->
+      <aside class="right-column">
+        <!-- About Us - XP style program window -->
+        <section class="config-panel">
+          <div class="xp-titlebar">
+            <div class="xp-title-text">About Us</div>
+            <div class="window-buttons" aria-hidden="true">
+              <div class="win-btn mini">–</div>
+              <div class="win-btn max">▢</div>
+              <div class="win-btn close">✕</div>
+            </div>
+          </div>
+
+          <div class="config-body">
+            <h4>About this project</h4>
+            <p>
+              Welcome to our AI-powered yoga trainer. We analyze your posture and give
+              practical feedback so you can improve balance, alignment and flexibility.
+            </p>
+
+            <ul>
+              <li>Pose detection using skeleton tracking</li>
+              <li>Personalized progression</li>
+              <li>Track your high scores</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Sponsored ad (Win98 bevel) -->
+          <section class="retro-window" style="min-height: 180px;">
+            <div class="retro-title">DATA</div>
+            <div class="stats-content">
+              <p><strong>Version: </strong> Alpha</p>
+              <p><strong>Credits: </strong> Bailey Soloveichick, Ofir Kvetny, Yoav Malka</p>
+        </div>
+      </section>
+
+      </aside>
+
+    </div> <!-- page-container -->
+  </div> <!-- page-wrap -->
+
+  <!-- Marquee bar (red) -->
+  <div class="marquee-bar">
+    <marquee>
+      <img src="{{ url_for('static', filename='art/ad.png') }}" height="100" style="vertical-align:middle;">
+      &nbsp;&nbsp;&nbsp;NEW: Try the Alpha Version of Yoba Project. OUT NOW EVERYWHERE! &nbsp;
+      &nbsp;&nbsp;<img src="{{ url_for('static', filename='art/ad.png') }}" height="100" style="vertical-align:middle;">
+        &nbsp;&nbsp;&nbsp;Practice your flexibility and other Yoga skills while having fun too&nbsp;
+    </marquee>
+  </div>
+
 </body>
 </html>
