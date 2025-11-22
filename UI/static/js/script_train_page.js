@@ -4,12 +4,20 @@ let video = document.getElementById("video");
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let detectedText = document.getElementById("detected-text");
+let cornerPic = document.getElementById("cornerPic");
+let playerMuteIcon = document.getElementById("mutePlayer");
+let trainerMuteIcon = document.getElementById("muteTrainer");
 
 let selectedPoses = JSON.parse(sessionStorage.getItem('selectedPoses') || '[]');
 let currentIndex = 0;
 let poseStatus = [];       // "pending", "done", "failed"
 let poseAttempts = [];     // number of tries per pose
-const maxAttempts = 3;
+
+let maxAttempts = 3;
+let numOfSeconds = 5;
+let instructionConfig = 'numerical';
+let emphasisesConfig = 'all';
+
 const posesListEl = document.getElementById("posesList");
 const currentPoseGif = document.getElementById("currentPoseGif");
 let counter = 0;
@@ -29,16 +37,54 @@ async function initCamera() {
         video.play();
     } catch (e) {
         detectedText.className = "red";
-        detectedText.textContent = "*Camera error: " + e.message + "*";
+        detectedText.textContent = "Camera error: " + e.message + "...";
     }
 }
+
+async function loadConfig() {
+  try {
+    const res = await fetch('/get_config'); // request from server
+    if (!res.ok) throw new Error('Config not found');
+    const data = await res.json();
+
+    // Parse integers
+    const time = parseInt(data.time, 10);
+    let attempts;
+    if (data.attempts === 'infinity') {
+      attempts = Infinity;
+    } else {
+      attempts = parseInt(data.attempts, 10);
+    }
+
+    // Strings
+    const instructions = data.instructions;
+    const emphasises = data.emphasises;
+
+    console.log({ time, attempts, instructions, emphasises });
+    return { time, attempts, instructions, emphasises };
+
+  } catch (err) {
+    console.error('Error loading config:', err);
+    return null;
+  }
+}
+loadConfig().then(config => {
+  if (config) {
+    maxAttempts = config.attempts;
+    numOfSeconds = config.time;
+    instructionConfig = config.instructions;
+    emphasisesConfig = config.emphasises;
+  }
+});
+
 initCamera();
 
 //=== Instructions & Body Scan ===//
 function showInstructions() {
+    cornerPic.src = "/static/art/instr.png";
     currentPoseGif.src = "/static/art/standin.gif";
     counter++;
-    detectedText.className = "pink";
+    detectedText.className = "white";
     detectedText.textContent = counter === 1 
         ? "Hello! We need to scan your whole body before the training starts. Are you ready?" 
         : "Ready?";
@@ -56,13 +102,15 @@ function startListeningBodyScan() {
     recognition.maxAlternatives = 1;
 
     detectedText.className = "yellow";
-    detectedText.textContent = "...";
+    detectedText.textContent = "~ quite ~";
+    playerMuteIcon.src = "/static/art/unmuted.png";
+    cornerPic.src = "/static/art/hearing.png";
 
     recognition.onresult = (event) => {
         const phrase = event.results[0][0].transcript.trim().toLowerCase();
         detectedText.textContent = phrase;
 
-        if (["yes","yeah","yep","sure","ok","okay","bailey","ofir","yoav","banana","okay"].some(w => phrase.includes(w))) {
+        if (["yes","yeah","yep","sure","ok","okay","of course","i am"].some(w => phrase.includes(w))) {
             captureBodyScan();
         } else {
             stopListening();
@@ -94,19 +142,23 @@ function captureBodyScan() {
     .then(data => {
         stopListening();
         if (data.status === "ok") {
-            detectedText.className = "pink";
-            detectedText.textContent = "*Body scan successful!*";
+            detectedText.className = "white";
+            detectedText.textContent = "Body scan successful!";
+            cornerPic.src = "/static/art/ok.png";
+            document.getElementById("mute-icon").src = "/static/art/muted.png";
             setupPoseList();
             startNextPose();
         } else {
             detectedText.className = "red";
-            detectedText.textContent = "*Body scan failed, click Start again*";
+            detectedText.textContent = "Body scan failed, click Start again";
+            cornerPic.src = "/static/art/warning.png";
         }
     })
     .catch(err => {
         console.error("Body scan error:", err);
         detectedText.className = "red";
-        detectedText.textContent = "*Upload error*";
+        detectedText.textContent = "Upload error";
+        cornerPic.src = "/static/art/warning.png";
     });
 }
 
@@ -142,8 +194,9 @@ function startNextPose() {
     const nextIndex = poseStatus.indexOf("pending");
     if (nextIndex === -1) {
         // Training complete
-        detectedText.textContent = "*Training complete!*";
+        detectedText.textContent = "Training complete!";
         speechSynthesis.speak(new SpeechSynthesisUtterance("Training complete. Well done!"));
+        cornerPic.src = "/static/art/ok.png";
 
         // Redirect to score
         setTimeout(() => {
@@ -176,8 +229,9 @@ function updateCurrentPoseUI() {
     });
 
     if (poseStatus[currentIndex] === "pending") {
-        detectedText.className = "pink";
+        detectedText.className = "white";
         detectedText.textContent = `Next: ${pose}`;
+        cornerPic.src = "/static/art/instr.png";
         const msg = new SpeechSynthesisUtterance(`Next exercise: ${pose}`);
         msg.lang = "en-US";
         speechSynthesis.speak(msg);
@@ -186,12 +240,12 @@ function updateCurrentPoseUI() {
 
 //=== Countdown & Capture ===//
 function startCountdownCapture() {
-    let count = 5;
     const interval = setInterval(() => {
-        detectedText.textContent = `Capture in: ${count}`;
+        detectedText.textContent = `Capture in: ${numOfSeconds}`;
         detectedText.className = "gray";
-        count--;
-        if (count < 0) {
+        cornerPic.src = "/static/art/clock.png";
+        numOfSeconds--;
+        if (numOfSeconds < 0) {
             clearInterval(interval);
             capturePose();
         }
@@ -210,6 +264,7 @@ async function capturePose() {
     // Capture 9 frames evenly spaced across 3 seconds
     for (let i = 0; i < numFrames; i++) {
         detectedText.textContent = "Capturing " + (i+1) + "/" + numFrames + " photos..." ;
+        cornerPic.src = "/static/art/instr.png";
         ctx.save();
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
@@ -224,6 +279,7 @@ async function capturePose() {
 
     detectedText.className = "gray";
     detectedText.textContent = "Analyzing your pose...";
+    cornerPic.src = "/static/art/instr.png";
 
     // Send all images together
     fetch("/upload_burst", {
@@ -240,6 +296,7 @@ async function capturePose() {
             if (data.len > 0) {
                 poseAttempts[currentIndex]++;
                 detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts})`;
+                cornerPic.src = "/static/art/instr.png";
                 speechSynthesis.speak(new SpeechSynthesisUtterance(data.msg));
 
                 if (poseAttempts[currentIndex] >= maxAttempts) {
@@ -252,33 +309,51 @@ async function capturePose() {
             } else {
                 poseStatus[currentIndex] = "done";
                 updateCurrentPoseUI();
-                detectedText.textContent = "*Pose correct!*";
+                detectedText.textContent = "Pose correct!";
+                cornerPic.src = "/static/art/ok.png";
                 speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
-                setTimeout(startNextPose, 1000);
+                setTimeout(startNextPose, 1500);
             }
         } else {
             detectedText.className = "red";
-            detectedText.textContent = "*Server error* " + (data.message || "unknown");
+            detectedText.textContent = (data.message || "unknown");
+            cornerPic.src = "/static/art/no.png";
         }
     })
     .catch(err => {
         console.error("Pose upload error:", err);
         detectedText.className = "red";
-        detectedText.textContent = "*Upload error*";
+        detectedText.textContent = "Upload error";
+        cornerPic.src = "/static/art/warning.png";
     });
 }
 
 //=== Utilities ===//
-function stopListening() { if (recognition) recognition.stop(); }
+function stopListening() {
+    playerMuteIcon.src = "/static/art/muted.png";
+    trainerMuteIcon.src = "/static/art/muted.png";
+    if (recognition) recognition.stop();
+}
+
 document.getElementById("startBtn").onclick = () => {
     const bodyScanDone = poseStatus.length > 0;
+    trainerMuteIcon.src = "/static/art/unmuted.png";
     if (bodyScanDone) {
         detectedText.className = "gray";
-        detectedText.textContent = "*Resuming current pose...*";
+        detectedText.textContent = "Resuming current pose...";
+        cornerPic.src = "/static/art/instr.png";
         updateCurrentPoseUI();
         startCountdownCapture();
     } else {
         showInstructions();
     }
 };
-detectedText.textContent = "*Click Start to begin*";
+
+document.getElementById("endBtn").onclick = () => {
+    speechSynthesis.speak(new SpeechSynthesisUtterance("Bye bye!"));
+    trainerMuteIcon.src = "/static/art/unmuted.png";
+    stopListening();
+    window.location.href = `/welcome`;
+};
+
+detectedText.textContent = "Click Start to begin";

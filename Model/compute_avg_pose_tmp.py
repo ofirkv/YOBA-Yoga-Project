@@ -6,15 +6,20 @@ from collections import Counter
 # ===========================
 # Pose name input
 # ===========================
-pose_name = "ardha_chandrasana"  # 👈 Replace manually before each run
+pose_name = "tree"
 
 # Initialize pose detector
 detector = PoseDetector()
 
 # List of 10 image filenames
+# image_filenames = [
+#     "1.png", "2.png", "3.png", "4.png", "5.png",
+#     "6.png", "7.png", "8.png", "9.png", "10.png"
+# ]
+
 image_filenames = [
-    "1.png", "2.png", "3.png", "4.png", "5.png",
-    "6.png", "7.png", "8.png", "9.png", "10.png"
+    "1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg",
+    "6.jpeg", "7.jpeg", "8.jpeg", "9.jpeg", "10.jpg"
 ]
 
 all_angles = []
@@ -22,7 +27,7 @@ all_directions = []
 
 # Loop through images
 for idx, image_filename in enumerate(image_filenames, start=1):
-    results, keypoints, confidence = detector.detect_pose(image_filename)
+    results, keypoints, confidence = detector.detect_pose(f"{image_filename}")
 
     if results is None:
         print(f"Image {idx} ({image_filename}): Pose not detected")

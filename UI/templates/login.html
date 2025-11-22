@@ -2,15 +2,30 @@
 <html lang="en" dir="rtl">
 <head>
   <meta charset="utf-8" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
   <title>Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="../static/css/style_login.css">
+  <link rel="stylesheet" href="../static/general.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Login</h2>
+  <div class="window">
+  <div class="titlebar">
+    Login Window
+    <div class="window-buttons">
+      <div class="win-btn" style="margin-bottom:0;">–</div>
+      <div class="win-btn" style="margin-bottom:0;">□</div>
+      <div class="win-btn close" style="margin-bottom:0;">✕</div>
+    </div>
+  </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+  <div class="window-content">
+    <h2 style="margin-top:0;">Login</h2>
+    <form method="post" action="{{ url_for('login') }}">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required />
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Password" required />
+        {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="msg">
           {% for category, msg in messages %}
@@ -19,19 +34,12 @@
         </div>
       {% endif %}
     {% endwith %}
-
-    <form method="post" action="{{ url_for('login') }}">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" placeholder="you@example.com" required />
-
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" placeholder="Password" required />
-
       <div class="actions">
         <button type="submit">Login</button>
         <a href="{{ url_for('register') }}">Register</a>
       </div>
     </form>
   </div>
+</div>
 </body>
 </html>

@@ -1,0 +1,23 @@
+{
+    "pose_name": "veerabhadrasana",
+    "angles": {
+        "left_elbow_angle": 173.386,
+        "right_elbow_angle": 173.455,
+        "left_shoulder_angle": 101.497,
+        "right_shoulder_angle": 93.478,
+        "left_knee_angle": 109.501,
+        "right_knee_angle": 176.179,
+        "left_hip_angle": 99.08,
+        "right_hip_angle": 138.741
+    },
+    "directions": {
+        "left_elbow_angle": "up",
+        "right_elbow_angle": "up",
+        "left_shoulder_angle": "down",
+        "right_shoulder_angle": "down",
+        "left_knee_angle": "left",
+        "right_knee_angle": "left",
+        "left_hip_angle": "right",
+        "right_hip_angle": "left"
+    }
+}

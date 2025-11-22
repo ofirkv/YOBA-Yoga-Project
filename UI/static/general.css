@@ -1,0 +1,164 @@
+html, body {
+  font-family: Candara, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  display: flex;              /* flex container */
+  flex-direction: column;     /* stack items vertically */
+  justify-content: center;    /* vertical centering */
+  align-items: center;        /* horizontal centering */
+
+  background: url('./art/background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+/* cursor */
+* {
+  cursor: url("./art/cursor.cur") 0 0, url("./art/cursor.png") 0 0, auto;
+}
+a:hover, button:hover {
+  cursor: url("./art/handcursor.cur") 0 0, url("./art/handcursor.png") 0 0, auto !important;
+}
+.window {
+  width: 450px;
+  background: #ece9d8; /* Windows 2000/XP gray-beige */
+  border: 3px solid #000;
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 #0008;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* Title bar */
+.titlebar {
+  background: linear-gradient(#94aedd, #5a81c3);
+  color: white;
+  padding: 4px 8px;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Window control buttons */
+.window-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.win-btn {
+  width: 18px;
+  height: 18px;
+  background: #c0c0c0;
+  border: 1px solid white;
+  border-right-color: #666;
+  border-bottom-color: #666;
+  font-size: 12px;
+  text-align: center;
+  line-height: 18px;
+  font-weight: bold;
+  color: #222;
+  cursor: default;
+  border-radius: 2px;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+}
+
+/* slight coloring for close button */
+.win-btn.close {
+  background: linear-gradient(#ff7b7b, #ff4040);
+  color: white;
+  border-color: rgba(0,0,0,0.2);
+}
+
+/* Window body */
+.window-content {
+  padding: 30px;
+  background: #ece9d8;
+}
+input[type="checkbox"] {
+  text-align: left;
+}
+/* Retro inputs */
+select,
+input[type="number"],
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 6px;
+  margin-top: 6px;
+  border: 2px solid #7b7b7b;
+  background: white;
+  font-size: 14px;
+  outline: none;
+  font-family: Tahoma, sans-serif;
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+/* Retro focus */
+input:focus {
+  border-color: #3a6ea5;
+}
+div {
+  margin-bottom: 6px;
+}
+/* Retro button */
+button {
+  background: #ece9d8;
+  border: 2px solid #7b7b7b;
+  border-right-color: #222;
+  border-bottom-color: #222;
+  padding: 6px 12px;
+  font-family: Tahoma, sans-serif;
+}
+
+button:active {
+  border: 2px solid #222;
+  border-right-color: #7b7b7b;
+  border-bottom-color: #7b7b7b;
+  background: #dcd8c8;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.msg {
+  color: red;
+}
+.row {
+  display: flex;
+  gap: 20px;
+}
+.col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.row .col label {
+  margin-bottom: 4px;
+}
+textarea {
+  width: 120px;
+  padding: 6px;
+  margin-top: 6px;
+  border: 2px solid #7b7b7b;
+  background: white;
+  font-size: 14px;
+  outline: none;
+  font-family: Tahoma, sans-serif;
+  margin-bottom: 12px;
+}
+.injuries-list {
+  display: flex;
+  padding: 10px;
+}

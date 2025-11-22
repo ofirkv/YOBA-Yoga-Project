@@ -1,0 +1,23 @@
+{
+    "pose_name": "tree",
+    "angles": {
+        "left_elbow_angle": 141.341,
+        "right_elbow_angle": 143.857,
+        "left_shoulder_angle": 173.824,
+        "right_shoulder_angle": 171.013,
+        "left_knee_angle": 176.327,
+        "right_knee_angle": 35.262,
+        "left_hip_angle": 176.539,
+        "right_hip_angle": 124.415
+    },
+    "directions": {
+        "left_elbow_angle": "left",
+        "right_elbow_angle": "right",
+        "left_shoulder_angle": "left",
+        "right_shoulder_angle": "left",
+        "left_knee_angle": "left",
+        "right_knee_angle": "right",
+        "left_hip_angle": "right",
+        "right_hip_angle": "left"
+    }
+}

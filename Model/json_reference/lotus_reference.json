@@ -1,0 +1,23 @@
+{
+    "pose_name": "lotus",
+    "angles": {
+        "left_elbow_angle": 156.792,
+        "right_elbow_angle": 156.163,
+        "left_shoulder_angle": 19.58,
+        "right_shoulder_angle": 18.214,
+        "left_knee_angle": 20.603,
+        "right_knee_angle": 23.282,
+        "left_hip_angle": 103.815,
+        "right_hip_angle": 107.702
+    },
+    "directions": {
+        "left_elbow_angle": "right",
+        "right_elbow_angle": "left",
+        "left_shoulder_angle": "down",
+        "right_shoulder_angle": "down",
+        "left_knee_angle": "left",
+        "right_knee_angle": "right",
+        "left_hip_angle": "right",
+        "right_hip_angle": "left"
+    }
+}

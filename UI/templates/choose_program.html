@@ -3,75 +3,201 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
   <title>YOBA - Workout Builder</title>
-  <link rel="stylesheet" href="../static/css/style_choose_program.css">
+  <link rel="stylesheet" href="../static/style_choose_program.css">
 </head>
+
 <body>
   <div class="container">
-    <!-- LEFT SIDE: camera / poses selection -->
-    <section class="leftside" aria-label="Camera and poses selection">
-      <!-- existing video/canvas elements (your CSS expects these IDs) -->
+
+    <!-- LEFT SIDE (retro window) -->
+    <section class="left-side">
+
+      <!-- camera / canvas remain in DOM but styled behind via CSS -->
       <video id="video" autoplay playsinline muted></video>
       <canvas id="canvas"></canvas>
 
-      <div class="left-inner" role="region" aria-label="Pose selection overlay">
-        <h2 style="color:white; margin:0 0 6px 0;">Select Poses (up to 5)</h2>
+      <!-- RETRO WINDOW -->
+      <div class="left-window">
 
-            <div class="poses-grid" id="posesGrid">
-            <div class="pose-card" data-pose-id="Ardha Chandrasana">
-                <img src="../static/art/ardha_chandrasana.jpeg" alt="Ardha Chandrasana Pose">
-            </div>
-
-            <div class="pose-card" data-pose-id="Utkata Konasana">
-                <img src="../static/art/utkata_konasana.jpeg" alt="Utkata Konasana Pose">
-            </div>
-
-            <div class="pose-card" data-pose-id="veerabhadrasana">
-                <img src="../static/art/veerabhadrasana.jpeg" alt="Veerabhadrasana Pose">
-            </div>
-
-            <div class="pose-card" data-pose-id="natarajasana">
-                <img src="../static/art/natarajasana.jpeg" alt="Natarajasana Pose">
-            </div>
-
-            <div class="pose-card" data-pose-id="Downward Dog">
-                <img src="../static/art/downward_dog.jpeg" alt="Downward Dog">
-            </div>
-            </div>
-
-
-        <!-- Selected workout list with START button -->
-        <div class="selected-container" aria-live="polite">
-          <div style="text-align:left;">
-            <div class="selected-list" id="selectedList" aria-label="Selected poses list">
-              <!-- Selected items will be appended here by JavaScript -->
-            </div>
+        <!-- TITLEBAR (HTML fake buttons) -->
+        <div class="left-titlebar">
+          <div class="title">
+            <span style="font-size:13px;">Pose Chooser</span>
           </div>
 
-          <div>
+          <div class="win-controls" aria-hidden="true">
+            <div class="win-btn" id="left-min">–</div>
+            <div class="win-btn" id="left-max">□</div>
+            <div class="win-btn close" id="left-close">✕</div>
+          </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="left-inner">
+
+          <h2 style="margin:0 0 12px 0;color: #919191">Select up to 5 poses</h2>
+
+          <!-- FILTERS — restructured markup: label.filter-tab > input + span.tab-text -->
+          <div class="filters" role="toolbar" aria-label="pose filters">
+            <label class="filter-tab">
+              <input type="checkbox" class="cat-filter" value="standing" checked>
+              <span class="tab-text">Standing</span>
+            </label>
+
+            <label class="filter-tab">
+              <input type="checkbox" class="cat-filter" value="balance" checked>
+              <span class="tab-text">Balance</span>
+            </label>
+
+            <label class="filter-tab">
+              <input type="checkbox" class="cat-filter" value="back" checked>
+              <span class="tab-text">Back</span>
+            </label>
+
+            <label class="filter-tab">
+              <input type="checkbox" class="cat-filter" value="sitting" checked>
+              <span class="tab-text">Sitting</span>
+            </label>
+
+            <label class="filter-tab">
+              <input type="checkbox" class="cat-filter" value="abs" checked>
+              <span class="tab-text">Abs</span>
+            </label>
+          </div>
+
+          <!-- GRID -->
+          <div class="poses-grid" id="posesGrid">
+
+            <div class="pose-card" data-category="balance" data-pose-id="Ardha Chandrasana">
+              <img src="../static/art/ardha_chandrasana.png" alt="Ardha Chandrasana">
+              <div class="tag">Balance</div>
+            </div>
+
+            <div class="pose-card" data-category="balance" data-pose-id="Natarajasana">
+              <img src="../static/art/natarajasana.png" alt="Natarajasana">
+              <div class="tag">Balance</div>
+            </div>
+
+            <div class="pose-card" data-category="balance" data-pose-id="Tree">
+              <img src="../static/art/tree.png" alt="Tree">
+              <div class="tag">Balance</div>
+            </div>
+
+            <div class="pose-card" data-category="standing" data-pose-id="Utkata Konasana">
+              <img src="../static/art/utkata_konasana.png" alt="Utkata Konasana">
+              <div class="tag">Standing</div>
+            </div>
+
+            <div class="pose-card" data-category="standing" data-pose-id="Warrior">
+              <img src="../static/art/warrior.png" alt="Warrior">
+              <div class="tag">Standing</div>
+            </div>
+
+            <div class="pose-card" data-category="standing" data-pose-id="Triangle">
+              <img src="../static/art/triangle.png" alt="Triangle">
+              <div class="tag">Standing</div>
+            </div>
+
+            <div class="pose-card" data-category="back" data-pose-id="Downward Dog">
+              <img src="../static/art/downward_dog.png" alt="Downward Dog">
+              <div class="tag">Back</div>
+            </div>
+
+            <div class="pose-card" data-category="back" data-pose-id="Cobra">
+              <img src="../static/art/cobra.png" alt="Cobra">
+              <div class="tag">Back</div>
+            </div>
+
+            <div class="pose-card" data-category="back" data-pose-id="Gymnastic Bridge">
+              <img src="../static/art/gymnastic_bridge.png" alt="Gymnastic Bridge">
+              <div class="tag">Back</div>
+            </div>
+
+            <div class="pose-card" data-category="abs" data-pose-id="Plank">
+              <img src="../static/art/plank.png" alt="Plank">
+              <div class="tag">Abs</div>
+            </div>
+
+            <div class="pose-card" data-category="abs" data-pose-id="Bow">
+              <img src="../static/art/bow.png" alt="Bow">
+              <div class="tag">Abs</div>
+            </div>
+
+            <div class="pose-card" data-category="abs" data-pose-id="Boat">
+              <img src="../static/art/boat.png" alt="Boat">
+              <div class="tag">Abs</div>
+            </div>
+
+            <div class="pose-card" data-category="sitting" data-pose-id="Lotus">
+              <img src="../static/art/lotus.png" alt="Lotus">
+              <div class="tag">Sitting</div>
+            </div>
+
+            <div class="pose-card" data-category="sitting" data-pose-id="Seated Forward Bend">
+              <img src="../static/art/seated_forward_bend.png" alt="Seated Forward Bend">
+              <div class="tag">Sitting</div>
+            </div>
+
+            <div class="pose-card" data-category="sitting" data-pose-id="Hero">
+              <img src="../static/art/hero.png" alt="Hero">
+              <div class="tag">Sitting</div>
+            </div>
+
+          </div>
+
+          <!-- SELECTED POSES & START (horizontal layout) -->
+          <div class="selected-container" aria-live="polite">
+            <div class="selected-list" id="selectedList" role="list"></div>
             <button id="startWorkout" class="start-btn" aria-disabled="true">START</button>
           </div>
-        </div>
-      </div>
+
+        </div> <!-- left-inner -->
+
+      </div> <!-- left-window -->
+
     </section>
 
-    <!-- RIGHT SIDE: AI auto-build panel -->
-    <aside class="rightside" aria-label="AI workout builder">
-      <div class="instr ai-panel" role="form" aria-labelledby="aiTitle">
-        <h2 id="aiTitle">Want an AI-generated workout tailored to you?</h2>
-        <p>Pick a difficulty level and we'll build a short routine</p>
+    <!-- RIGHT SIDE — WINDOWS-XP PANEL (unchanged) -->
+    <aside class="right-side">
 
-        <div>
-          <button class="difficulty-btn" data-difficulty="easy" id="btnEasy">Easy</button>
-          <button class="difficulty-btn" data-difficulty="medium" id="btnMedium">Medium</button>
-          <button class="difficulty-btn" data-difficulty="hard" id="btnHard">Challenge</button>
+      <div class="config-panel" style="margin-top: 50px">
+
+        <div class="config-section" id="section-instructions">
+          <h3>Instructions</h3>
+          <label><input type="radio" name="instructions" value="metaphorical" checked> Metaphorical instructions</label>
+          <label><input type="radio" name="instructions" value="numerical"> How much to complete</label>
+          <label><input type="radio" name="instructions" value="goal"> Goal angle degree value</label>
         </div>
+
+        <div class="config-section" id="section-attempts">
+          <h3>Attempts</h3>
+          <label><input type="radio" name="attemptsOption" value="bar" checked> Slider</label>
+          <label><input type="radio" name="attemptsOption" value="infinity"> Infinity</label>
+          <input type="range" id="attemptsSlider" min="1" max="10" value="3">
+          <span id="attemptsValue">3</span>
+        </div>
+
+        <div class="config-section" id="section-time">
+          <h3>Time (seconds)</h3>
+          <input type="range" id="timeSlider" min="2" max="15" value="5">
+          <span id="timeValue">5</span>
+        </div>
+
+        <div class="config-section" id="section-emphasises">
+          <h3>Emphasises</h3>
+          <label><input type="radio" name="emphasises" value="all" checked> All parts</label>
+          <label><input type="radio" name="emphasises" value="specific"> Only key joints</label>
+        </div>
+
+        <button id="saveConfigBtn" class="start-btn" style="margin: 20px">Save Config</button>
 
       </div>
     </aside>
+
   </div>
 
-    <script src="../static/js/script_choose_program.js"></script>
-
+  <script src="../static/js/script_choose_program.js"></script>
 </body>
 </html>
