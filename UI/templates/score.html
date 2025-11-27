@@ -1,22 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}"
+    />
     <title>Training Score</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
-        .score { font-size: 2em; color: #4CAF50; }
-        .message { font-size: 1.2em; margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 1em; margin-top: 40px; cursor: pointer; }
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 100px;
+      }
+      .score {
+        font-size: 2em;
+        color: #4caf50;
+      }
+      .message {
+        font-size: 1.2em;
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 1em;
+        margin-top: 40px;
+        cursor: pointer;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Training Complete!</h1>
     <div class="score" id="scoreText"></div>
     <div class="message" id="messageText"></div>
     <button onclick="goToHome()">Go Home</button>
+    <button onclick="trainAgain()">Try Again this Training</button>
 
     <script src="../static/js/script_score.js"></script>
-</body>
+  </body>
 </html>

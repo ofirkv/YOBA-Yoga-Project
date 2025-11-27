@@ -243,9 +243,15 @@ def personal_data():
 @app.route("/welcome")
 def welcome():
     user_name = session.get("user_name")
+    last_score = session.get("last_score")
+    max_score = session.get("max_score")
     if not user_name:
         return redirect(url_for("login"))
-    return render_template("welcome.html", user_name=user_name)
+    if not last_score:
+        last_score = 0
+    if not max_score:
+        max_score = 0
+    return render_template("welcome.html", user_name=user_name, last_score=last_score, max_score=max_score)
 
 
 @app.route("/choose_program")
@@ -289,7 +295,7 @@ def upload_burst():
         # --- Initialize models ---
         detector = PoseDetector()
         extractor = FeatureExtractor()
-        feedback = PoseFeedback(threshold_deg=20.0, instructions_config=data_config["instructions"],
+        feedback = PoseFeedback(threshold_deg=30.0, instructions_config=data_config["instructions"],
                                 emphasises=data_config["emphasises"], pose_name=pose_name)
 
         if not images_base64:
@@ -320,7 +326,7 @@ def upload_burst():
         best_angles = None
         best_directions = None
 
-        CONFIDENCE_THRESHOLD = 0.8
+        CONFIDENCE_THRESHOLD = 0.6
 
         # --- Process each image ---
         for i, filepath in enumerate(image_paths):
@@ -344,7 +350,7 @@ def upload_burst():
 
                 results_pose, keypoints, confidence = detector.detect_pose(detect_path)
 
-                if confidence < CONFIDENCE_THRESHOLD:
+                if confidence < CONFIDENCE_THRESHOLD: # average of all landmarks is < 0.6
                     continue  # skip low-confidence images
 
                 # --- Compute angles and directions ---
@@ -441,12 +447,33 @@ def first_scan():
 def index():
     return redirect(url_for("login"))
 
-
 @app.route("/score")
 def score():
-    perfect = request.args.get("perfect", 0)
-    total = request.args.get("total", 0)
-    return render_template("score.html", perfect=perfect, total=total)
+    # Get values as floats (Flask can cast request args for you)
+    perfect = request.args.get("perfect", default=0.0, type=float)
+    total = request.args.get("total", default=0.0, type=float)
+
+    # Avoid division by zero
+    if total == 0:
+        last_score = 0.0
+    else:
+        last_score = (perfect / total) * 100
+
+    # Save last score in the session
+    session["last_score"] = str(last_score)
+
+    # Get previous max_score safely (default 0 if not set yet)
+    previous_max = float(session.get("max_score", 0) or 0)
+    session["max_score"] = str(max(previous_max, last_score))
+
+    return render_template(
+        "score.html",
+        perfect=perfect,
+        total=total,
+        last_score=last_score,
+        max_score=session["max_score"],
+    )
+
 
 @app.route('/save_config', methods=['POST'])
 def save_config():
