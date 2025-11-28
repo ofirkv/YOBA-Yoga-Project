@@ -48,6 +48,15 @@ a:hover, button:hover, .filter-tab:hover, .pose-card, img, .tag {
   font-family: Tahoma, sans-serif;
 }
 
+.config-btn {
+  background: #ece9d8;
+  border: 2px solid #7b7b7b;
+  border-right-color: #222;
+  border-bottom-color: #222;
+  padding: 6px 12px;
+  font-family: Tahoma, sans-serif;
+}
+
 button:active {
   border: 2px solid #222;
   border-right-color: #7b7b7b;
@@ -117,7 +126,6 @@ button:active {
   line-height: 18px;
   font-weight: bold;
   color: #222;
-  cursor: default;
   border-radius: 2px;
   box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
 }
@@ -215,7 +223,7 @@ a:hover, button:hover {
   position: fixed;
   top: 0;
   left: 0;
-  width: 60vw;        /* matches left panel width */
+  width: 60vw;
   height: 100vh;
   object-fit: cover;
   transform: scaleX(-1);
@@ -498,7 +506,7 @@ a:hover, button:hover {
 
 /* START button placed to the right but vertically centered */
 .start-btn {
-  background: #cfc5be;
+  background: #b5b5b5;
   border: 2px solid #7b7b7b;
   border-right-color: #222;
   border-bottom-color: #222;

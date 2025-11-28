@@ -13,16 +13,18 @@ function getQueryParams() {
 
 function displayScore() {
   const params = getQueryParams();
-  const perfect = parseInt(params.perfect) || 0;
+  let perfect = parseInt(params.perfect) || 0;
   const total = parseInt(params.total) || 0;
-
+  if(perfect < 0) {
+    perfect = 0;
+  }
   const scoreText = document.getElementById("scoreText");
   const messageText = document.getElementById("messageText");
 
-  scoreText.textContent = `${perfect} / ${total} exercises perfect`;
+  scoreText.textContent = `Score: ${perfect} / ${total}`;
 
   if (perfect === total && total > 0) {
-    messageText.textContent = "🎉 Excellent! You nailed all poses!";
+    messageText.textContent = "Excellent! You nailed all poses!";
   } else if (perfect > 0) {
     messageText.textContent = "Good job! Keep practicing to improve.";
   } else {

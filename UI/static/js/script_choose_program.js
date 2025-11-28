@@ -71,6 +71,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.pose-card').forEach(card => {
       const cat = card.dataset.category;
       card.style.display = activeCategories.includes(cat) ? 'block' : 'none';
+
+      card.addEventListener("click", async () => {
+        const pose = card.dataset.poseId;
+        const category = card.dataset.category;
+
+        const res = await fetch("/check_pose_injuries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pose, category })
+        });
+
+        const data = await res.json();
+
+        if (data.warning) {
+            alert(data.message);
+        }
+
+        // Continue selecting pose as usual...
+        card.classList.toggle("selected");
+    });
     });
   }
 

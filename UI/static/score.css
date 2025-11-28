@@ -1,0 +1,71 @@
+html, body {
+  font-family: Candara, sans-serif;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: url('./art/pinkground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+/* cursor */
+* {
+  cursor: url("./art/cursor.cur") 0 0, url("./art/cursor.png") 0 0, auto;
+}
+a:hover, button:hover {
+  cursor: url("./art/handcursor.cur") 0 0, url("./art/handcursor.png") 0 0, auto !important;
+}
+.pixel {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 60px;
+  color:white;
+  text-shadow: 0 0 1px black;
+}
+.score {
+  font-size: 40px;
+  color:white;
+  font-weight: bold;
+  text-shadow: 0 0 1px black;
+}
+.message {
+  font-size: 35px;
+  color: #fff1b9;
+  font-weight: bolder;
+  text-shadow: 0 0 1px black;
+}
+
+.buttons {
+  display: flex;
+  margin: 10px;
+}
+
+button {
+  margin: 15px;
+  padding: 18px 34px;
+  text-decoration: none;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, filter 0.12s ease;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 2px solid black;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+button:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.2);
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.12);
+}
+

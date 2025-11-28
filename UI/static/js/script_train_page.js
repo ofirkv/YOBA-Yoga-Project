@@ -17,6 +17,7 @@ let poseAttempts = []; // number of tries per pose
 
 let maxAttempts = 3;
 let numOfSeconds = 5;
+let perfectCount = 0;
 let instructionConfig = "numerical";
 let emphasisesConfig = "all";
 
@@ -218,7 +219,7 @@ function captureBodyScan() {
           captureBodyScan();
         }, 4000);
       }
-      // --- כשל כללי ---
+
       else {
         detectedText.className = "red";
         detectedText.textContent =
@@ -226,7 +227,7 @@ function captureBodyScan() {
         speak(detectedText.textContent);
         cornerPic.src = "/static/art/warning.png";
         setTimeout(() => {
-          showInstructions(); // או startListeningBodyScan(); אם אתה רוצה ישר האזנה
+          showInstructions();
         }, 4000);
       }
     })
@@ -278,8 +279,7 @@ function startNextPose() {
 
     // Redirect to score
     setTimeout(() => {
-      const perfectCount = poseStatus.filter((s) => s === "done").length;
-      const totalCount = poseStatus.length;
+      const totalCount = poseStatus.length * 8;
       sessionStorage.setItem("perfect", perfectCount);
       sessionStorage.setItem("total", totalCount);
       window.location.href = `/score?perfect=${perfectCount}&total=${totalCount}`;
@@ -331,6 +331,11 @@ function startCountdownCapture() {
   }, 1000);
 }
 
+function updatePerfectCount(currWrongs) {
+  let totalJoints = 8;
+  perfectCount += totalJoints - currWrongs;
+}
+
 async function capturePose() {
   const numFrames = 9;
   const duration = 3000; // 3 seconds total
@@ -375,11 +380,12 @@ async function capturePose() {
       if (data.status === "ok") {
         if (data.len > 0) {
           poseAttempts[currentIndex]++;
-          detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts})`;
+          detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts}) : ${data.len} problems`;
           cornerPic.src = "/static/art/instr.png";
           speechSynthesis.speak(new SpeechSynthesisUtterance(data.msg));
 
           if (poseAttempts[currentIndex] >= maxAttempts) {
+            updatePerfectCount(data.len);
             poseStatus[currentIndex] = "failed";
             updateCurrentPoseUI();
             setTimeout(startNextPose, 1500);
@@ -387,6 +393,7 @@ async function capturePose() {
             setTimeout(startCountdownCapture, 1500);
           }
         } else {
+          updatePerfectCount(data.len);
           poseStatus[currentIndex] = "done";
           updateCurrentPoseUI();
           detectedText.textContent = "Pose correct!";
@@ -410,7 +417,7 @@ async function capturePose() {
 
 //=== Utilities ===//
 function stopListening() {
-  bodyScanListening = false; // <--- חשוב
+  bodyScanListening = false;
   playerMuteIcon.src = "/static/art/muted.png";
   trainerMuteIcon.src = "/static/art/muted.png";
   if (recognition) {

@@ -258,11 +258,49 @@ def welcome():
 def choose_program():
     return render_template("choose_program.html")
 
+@app.route("/check_pose_injuries", methods=["POST"])
+def check_pose_injuries():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"warning": False})
 
-@app.route("/body_scan")
-def body_scan():
-    return render_template("body_scan.html")
+    data = request.get_json()
+    pose_name = data.get("pose")
+    pose_category = data.get("category")  # we will send from frontend
 
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT injuries FROM user_profile WHERE user_id = %s", (user_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not row or not row["injuries"]:
+        return jsonify({"warning": False})
+
+    injuries = row["injuries"].lower().split(",")
+
+    CONFLICT_MAP = {
+        "back": ["back", "standing", "abs"],
+        "ankle": ["sitting", "balance"],
+        "wrist": ["standing", "balance"],
+        "balance": ["balance"]
+    }
+
+    problematic = []
+    for injury in injuries:
+        injury = injury.strip()
+        if injury in CONFLICT_MAP:
+            if pose_category.lower() in CONFLICT_MAP[injury]:
+                problematic.append(injury)
+
+    if problematic:
+        return jsonify({
+            "warning": True,
+            "message": f"The exercise you chose may be problematic due to your: {', '.join(problematic)} injury."
+        })
+
+    return jsonify({"warning": False})
 
 @app.route("/train")
 def train():
@@ -452,17 +490,10 @@ def score():
     # Get values as floats (Flask can cast request args for you)
     perfect = request.args.get("perfect", default=0.0, type=float)
     total = request.args.get("total", default=0.0, type=float)
+    last_score = (perfect / total) * 100
 
-    # Avoid division by zero
-    if total == 0:
-        last_score = 0.0
-    else:
-        last_score = (perfect / total) * 100
-
-    # Save last score in the session
     session["last_score"] = str(last_score)
 
-    # Get previous max_score safely (default 0 if not set yet)
     previous_max = float(session.get("max_score", 0) or 0)
     session["max_score"] = str(max(previous_max, last_score))
 
@@ -473,7 +504,6 @@ def score():
         last_score=last_score,
         max_score=session["max_score"],
     )
-
 
 @app.route('/save_config', methods=['POST'])
 def save_config():

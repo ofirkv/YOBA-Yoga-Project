@@ -208,7 +208,7 @@ button:hover, a:hover {
 .start-btn.pixel:hover {
   transform: translateY(-3px);
   filter: brightness(1.2);
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.17);
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* ---------------------------
