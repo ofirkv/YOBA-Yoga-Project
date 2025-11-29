@@ -218,9 +218,7 @@ function captureBodyScan() {
         setTimeout(() => {
           captureBodyScan();
         }, 4000);
-      }
-
-      else {
+      } else {
         detectedText.className = "red";
         detectedText.textContent =
           "Body scan failed. Please say yes to try again.";
@@ -272,9 +270,7 @@ function startNextPose() {
   if (nextIndex === -1) {
     // Training complete
     detectedText.textContent = "Training complete!";
-    speechSynthesis.speak(
-      new SpeechSynthesisUtterance("Training complete. Well done!")
-    );
+    speak("Training complete. Well done!");
     cornerPic.src = "/static/art/ok.png";
 
     // Redirect to score
@@ -311,9 +307,7 @@ function updateCurrentPoseUI() {
     detectedText.className = "white";
     detectedText.textContent = `Next: ${pose}`;
     cornerPic.src = "/static/art/instr.png";
-    const msg = new SpeechSynthesisUtterance(`Next exercise: ${pose}`);
-    msg.lang = "en-US";
-    speechSynthesis.speak(msg);
+    speak(`Next exercise: ${pose}`);
   }
 }
 
@@ -382,7 +376,7 @@ async function capturePose() {
           poseAttempts[currentIndex]++;
           detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts}) : ${data.len} problems`;
           cornerPic.src = "/static/art/instr.png";
-          speechSynthesis.speak(new SpeechSynthesisUtterance(data.msg));
+          speak(data.msg);
 
           if (poseAttempts[currentIndex] >= maxAttempts) {
             updatePerfectCount(data.len);
@@ -398,7 +392,7 @@ async function capturePose() {
           updateCurrentPoseUI();
           detectedText.textContent = "Pose correct!";
           cornerPic.src = "/static/art/ok.png";
-          speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
+          speak("Good job!");
           setTimeout(startNextPose, 1500);
         }
       } else {
@@ -442,7 +436,7 @@ document.getElementById("startBtn").onclick = () => {
 };
 
 document.getElementById("endBtn").onclick = () => {
-  speechSynthesis.speak(new SpeechSynthesisUtterance("Bye bye!"));
+  speak("Bye bye!");
   trainerMuteIcon.src = "/static/art/unmuted.png";
   stopListening();
   window.location.href = `/welcome`;

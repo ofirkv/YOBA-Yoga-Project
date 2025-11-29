@@ -15,7 +15,7 @@ function displayScore() {
   const params = getQueryParams();
   let perfect = parseInt(params.perfect) || 0;
   const total = parseInt(params.total) || 0;
-  if(perfect < 0) {
+  if (perfect < 0) {
     perfect = 0;
   }
   const scoreText = document.getElementById("scoreText");

@@ -282,7 +282,7 @@ def check_pose_injuries():
 
     CONFLICT_MAP = {
         "back": ["back", "standing", "abs"],
-        "ankle": ["sitting", "balance"],
+        "ankle": ["sitting", "balance", "back"],
         "wrist": ["standing", "balance"],
         "balance": ["balance"]
     }
