@@ -1,13 +1,12 @@
 # Mini-Project/model_free/conv_layer.py
-from typing import List, Tuple, Union, Optional
 import numpy as np
 
 DEFAULT_CONV_CONFIG = {
-    "pre_smooth": True,
+    "pre_smooth": False,
     "pre_smooth_kernel": "gaussian_5x5",
     "apply_relu": True,
     "abs_before_relu": False,
-    "apply_pool": True,
+    "apply_pool": False,
     "pool_size": (2, 2),
     "conv_kwargs": {
         "stride": 1,
@@ -19,7 +18,9 @@ DEFAULT_CONV_CONFIG = {
 DEFAULT_IMPORTANT_KERNELS = [
     "sobel_vertical",
     "sobel_horizontal",
-    "laplacian"
+    "laplacian",
+    "diagonal_main",
+    "diagonal_anti"
 ]
 
 KERNELS = {
@@ -100,7 +101,7 @@ def get_kernel(name):
 
 
 # ==== Convolution (cross-correlation) implementation ====
-def _normalize_stride(stride: Union[int, Tuple[int, int]]) -> Tuple[int, int]:
+def _normalize_stride(stride):
     if isinstance(stride, int):
         return (stride, stride)
     if isinstance(stride, tuple) and len(stride) == 2:
@@ -269,7 +270,7 @@ def apply_multiple_kernels(image, kernels, config = DEFAULT_CONV_CONFIG):
         stacked_maps: numpy array with shape (n_kernels, H_out, W_out)
     """
 
-    img = image.astype(np.float32)
+    img = image.astype(np.float32).copy()
 
     if config["pre_smooth"]:
         img = apply_convolution(img, get_kernel(config["pre_smooth_kernel"]), **config["conv_kwargs"])
@@ -284,6 +285,9 @@ def apply_multiple_kernels(image, kernels, config = DEFAULT_CONV_CONFIG):
 
         if config["apply_pool"]:
             fmap = max_pooling(fmap, pool_size=config["pool_size"])
+
+        if fmap.max() > 0:
+            fmap = fmap / fmap.max()
 
         maps.append(fmap)
 

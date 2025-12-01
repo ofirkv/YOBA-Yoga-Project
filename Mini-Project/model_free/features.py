@@ -1,6 +1,5 @@
 # Mini-Project/model_free/features.py
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional, Callable, Any
 import csv
 import numpy as np
 
@@ -63,7 +62,13 @@ def compute_per_map_stats(feature_map, threshold = None):
     if feature_map.ndim != 2:
         raise ValueError("feature_map must be 2D")
 
-    fmap = feature_map.astype(np.float32)
+    fmap = feature_map.astype(np.float32).copy()
+    
+    fmap = np.abs(fmap)
+
+    if fmap.max() > 0:
+        fmap /= fmap.max()
+
     total = float(fmap.sum())
     mean = float(fmap.mean()) if fmap.size > 0 else 0.0
     std = float(fmap.std()) if fmap.size > 0 else 0.0
@@ -73,7 +78,7 @@ def compute_per_map_stats(feature_map, threshold = None):
         threshold_local = max(0.1 * maxval, EPS)
     else:
         threshold_local = float(threshold)
-
+        
     # percent above threshold
     if fmap.size == 0:
         pct = 0.0
@@ -300,7 +305,7 @@ def calibrate_thresholds(feature_matrix, labels, feature_names, positive_label =
     pos_mask = labels_arr == positive_label
     neg_mask = ~pos_mask
 
-    thresholds: Dict[str, float] = {}
+    thresholds = {}
     D = feature_matrix.shape[1]
 
     if method == "percentile":

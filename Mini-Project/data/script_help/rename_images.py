@@ -4,7 +4,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RAW_FOLDER = os.path.join(BASE_DIR, "data", "raw")
 
-START_INDEX = 370
+START_INDEX = 636
 
 def rename_new_images():
     if not os.path.exists(RAW_FOLDER):

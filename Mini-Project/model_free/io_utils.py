@@ -1,17 +1,16 @@
 # Mini-Project/model_free/io_utils.py
 from pathlib import Path
-from typing import List, Tuple, Dict, Optional, Iterable, Union
 import csv
 import shutil
 
 import cv2
 import numpy as np
 
-DEFAULT_IMAGE_EXTENSIONS: Tuple[str, ...] = (".jpg", ".jpeg", ".png")
+DEFAULT_IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png")
 CSV_HEADER = ["filename", "label"]
 
 # --- Filesystem helpers ---
-def ensure_dir(path: Union[str, Path]) -> Path:
+def ensure_dir(path):
     """
     Ensure a directory exists. Returns the Path object.
     """
@@ -20,7 +19,7 @@ def ensure_dir(path: Union[str, Path]) -> Path:
     return p
 
 
-def list_images(folder: Union[str, Path], extensions: Tuple[str, ...] = DEFAULT_IMAGE_EXTENSIONS, recursive: bool = False) -> List[Path]:
+def list_images(folder, extensions = DEFAULT_IMAGE_EXTENSIONS, recursive = False):
     """
     List image file paths in a folder filtered by extensions.
     Returns a sorted list of Path objects.
@@ -36,7 +35,7 @@ def list_images(folder: Union[str, Path], extensions: Tuple[str, ...] = DEFAULT_
     return files_sorted
 
 
-def image_exists(path: Union[str, Path]) -> bool:
+def image_exists(path):
     """
     Return True if the path exists and is a file.
     """
@@ -45,7 +44,7 @@ def image_exists(path: Union[str, Path]) -> bool:
 
 
 # --- Image IO helpers ---
-def load_image(path: Union[str, Path], as_gray: bool = False) -> Optional[np.ndarray]:
+def load_image(path, as_gray = False):
     """
     Load image with OpenCV.
     - path: file path
@@ -67,7 +66,7 @@ def load_image(path: Union[str, Path], as_gray: bool = False) -> Optional[np.nda
     return img
 
 
-def validate_image_file(path: Union[str, Path]) -> bool:
+def validate_image_file(path):
     """
     Quick validation: file exists and OpenCV can decode it.
     """
@@ -81,7 +80,7 @@ def validate_image_file(path: Union[str, Path]) -> bool:
     return True
 
 
-def get_image_shape(path: Union[str, Path]) -> Optional[Tuple[int, int, int]]:
+def get_image_shape(path):
     """
     Return shape (height, width, channels) if readable, otherwise None.
     """
@@ -94,7 +93,7 @@ def get_image_shape(path: Union[str, Path]) -> Optional[Tuple[int, int, int]]:
     return img.shape[0], img.shape[1], img.shape[2]
 
 
-def save_image(path: Union[str, Path], image: np.ndarray, create_dir: bool = True, overwrite: bool = False) -> bool:
+def save_image(path, image, create_dir = True, overwrite = False):
     """
     Save image (numpy array) to path using OpenCV.
     - If create_dir is True, parent directory is created automatically.
@@ -115,7 +114,7 @@ def save_image(path: Union[str, Path], image: np.ndarray, create_dir: bool = Tru
     return bool(success)
 
 
-def copy_images_to_folder(src_paths: Iterable[Union[str, Path]], dst_folder: Union[str, Path], overwrite: bool = False) -> List[Path]:
+def copy_images_to_folder(src_paths, dst_folder, overwrite = False):
     """
     Copy multiple image files to dst_folder. Returns list of destination Paths for successfully copied files.
     """
@@ -137,7 +136,7 @@ def copy_images_to_folder(src_paths: Iterable[Union[str, Path]], dst_folder: Uni
 
 # --- CSV / labels helpers ---
 
-def read_labels_csv(csv_path: Union[str, Path]) -> Dict[str, str]:
+def read_labels_csv(csv_path):
     """
     Read labels CSV into a dictionary: filename -> label (possibly empty string).
     If the file does not exist, returns empty dict.
@@ -146,7 +145,7 @@ def read_labels_csv(csv_path: Union[str, Path]) -> Dict[str, str]:
     if not csv_p.exists():
         return {}
 
-    mapping: Dict[str, str] = {}
+    mapping = {}
     with csv_p.open("r", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         # allow files with or without header; expect 'filename' and 'label' columns
@@ -158,9 +157,7 @@ def read_labels_csv(csv_path: Union[str, Path]) -> Dict[str, str]:
     return mapping
 
 
-def write_labels_csv(csv_path: Union[str, Path],
-                     mapping: Dict[str, str],
-                     overwrite: bool = True) -> None:
+def write_labels_csv(csv_path, mapping, overwrite = True):
     """
     Write mapping (filename -> label) to csv_path.
     If overwrite is False and file exists, raises FileExistsError.
@@ -177,7 +174,7 @@ def write_labels_csv(csv_path: Union[str, Path],
             writer.writerow([fn, label])
 
 
-def append_label_to_csv(csv_path: Union[str, Path], filename: str, label: str) -> None:
+def append_label_to_csv(csv_path, filename, label):
     """
     Append a row to CSV. Creates file with header if not exists.
     """
@@ -191,7 +188,7 @@ def append_label_to_csv(csv_path: Union[str, Path], filename: str, label: str) -
         writer.writerow([filename, label])
 
 
-def update_label_in_csv(csv_path: Union[str, Path], filename: str, new_label: str) -> bool:
+def update_label_in_csv(csv_path, filename, new_label):
     """
     Update a filename label in the CSV. Returns True if updated, False if filename not found.
     Will rewrite the CSV file in-place.
@@ -213,7 +210,7 @@ def update_label_in_csv(csv_path: Union[str, Path], filename: str, new_label: st
 
 # --- Utilities for quick manual checks ---
 
-def collect_dataset_summary(folder: Union[str, Path], csv_path: Optional[Union[str, Path]] = None) -> Dict[str, int]:
+def collect_dataset_summary(folder, csv_path = None):
     """
     Return a small summary: total images, number labeled, number unlabeled, invalid images.
     Optionally takes a csv_path to compare mapping.

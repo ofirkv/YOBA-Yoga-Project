@@ -1,13 +1,12 @@
 # Mini-Project/model_free/preprocessing.py
 from pathlib import Path
-from typing import Union, Tuple
 
 import cv2
 import numpy as np
 
 from .io_utils import load_image, list_images
 
-def to_grayscale(image: np.ndarray) -> np.ndarray:
+def to_grayscale(image):
     """
     Convert BGR image to grayscale.
     If already single channel, return as-is.
@@ -17,7 +16,7 @@ def to_grayscale(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
-def resize(image: np.ndarray, size: Tuple[int, int] = (128, 128)) -> np.ndarray:
+def resize(image, size = (128, 128)):
     """
     Resize image to a fixed size.
     Size format: (width, height)
@@ -25,7 +24,7 @@ def resize(image: np.ndarray, size: Tuple[int, int] = (128, 128)) -> np.ndarray:
     return cv2.resize(image, size, interpolation=cv2.INTER_AREA)
 
 
-def normalize(image: np.ndarray) -> np.ndarray:
+def normalize(image):
     """
     Normalize pixel values to range [0, 1] as float32.
     """
@@ -33,7 +32,7 @@ def normalize(image: np.ndarray) -> np.ndarray:
     return image / 255.0
 
 
-def preprocess_image(path_or_image: Union[str, Path, np.ndarray]) -> np.ndarray:
+def preprocess_image(path_or_image):
     """
     Full preprocessing pipeline:
     - load if path
