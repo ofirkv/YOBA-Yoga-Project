@@ -7,35 +7,19 @@
       type="image/png"
       href="{{ url_for('static', filename='../static/art/lotuslogo.png') }}"
     />
+      <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <title>Training Score</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin-top: 100px;
-      }
-      .score {
-        font-size: 2em;
-        color: #4caf50;
-      }
-      .message {
-        font-size: 1.2em;
-        margin-top: 20px;
-      }
-      button {
-        padding: 10px 20px;
-        font-size: 1em;
-        margin-top: 40px;
-        cursor: pointer;
-      }
-    </style>
+      <link rel="stylesheet" href="../static/score.css">
   </head>
   <body>
-    <h1>Training Complete!</h1>
+    <h1 class="pixel">Training Complete!</h1>
     <div class="score" id="scoreText"></div>
     <div class="message" id="messageText"></div>
-    <button onclick="goToHome()">Go Home</button>
-    <button onclick="trainAgain()">Try Again this Training</button>
+    <br>
+    <div class="buttons">
+        <button id="home" style="background: linear-gradient(#5398fa, #2468b6)" onclick="goToHome()">Go Home</button>
+        <button id="tryagain" style="background: linear-gradient(#ffdc00, #cf9f18)" onclick="trainAgain()">Try Again</button>
+    </div>
 
     <script src="../static/js/script_score.js"></script>
   </body>

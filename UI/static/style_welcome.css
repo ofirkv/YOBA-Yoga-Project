@@ -1,27 +1,30 @@
 /* ---------------------------
    Global & Background
    --------------------------- */
-html, body {
+html,
+body {
   font-family: "Tahoma", "Trebuchet MS", Candara, sans-serif; /* windows XP style for UI */
   margin: 0px;
   padding: 0;
   height: 100%;
-  background: url('./art/grayground.png');
+  background: url("./art/grayground.png");
   background-position: center;
   color: #111;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  box-shadow:
-    0 0 0 5px #aeaeae inset
+  box-shadow: 0 0 0 5px #aeaeae inset;
 }
 
 /* Custom cursors (relative from CSS file: static/style_welcome.css -> ../static/art/... )
    Keep these files in static/art/ */
 * {
-  cursor: url("../static/art/cursor.cur") 0 0, url("../static/art/cursor.png") 0 0, auto;
+  cursor: url("../static/art/cursor.cur") 0 0,
+    url("../static/art/cursor.png") 0 0, auto;
 }
-button:hover, a:hover {
-  cursor: url("../static/art/handcursor.cur") 0 0, url("../static/art/handcursor.png") 0 0, auto !important;
+button:hover,
+a:hover {
+  cursor: url("../static/art/handcursor.cur") 0 0,
+    url("../static/art/handcursor.png") 0 0, auto !important;
 }
 
 /* ---------------------------
@@ -81,7 +84,7 @@ button:hover, a:hover {
   border-left: 3px solid #444;
   overflow: hidden;
   color: #4e4e4e;
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.25);;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.25);
 }
 .retro-window2 {
   position: relative;
@@ -94,11 +97,14 @@ button:hover, a:hover {
 .retro-window::before {
   content: "";
   position: absolute;
-  left: 0; top: 0; right: 0; bottom: 0;
-  border-top: 2px solid #f6f6f6;    /* light */
-  border-left: 2px solid #f6f6f6;   /* light */
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 2px solid #f6f6f6; /* light */
+  border-left: 2px solid #f6f6f6; /* light */
   border-bottom: 2px solid #4a4a4a; /* dark */
-  border-right: 2px solid #4a4a4a;  /* dark */
+  border-right: 2px solid #4a4a4a; /* dark */
   pointer-events: none;
   box-sizing: border-box;
 }
@@ -164,7 +170,7 @@ button:hover, a:hover {
   height: auto;
   margin: 10px auto 6px;
   display: block;
-  image-rendering: pixelated;     /* pixelated vibe */
+  image-rendering: pixelated; /* pixelated vibe */
   image-rendering: crisp-edges;
   padding: 6px;
   border-radius: 6px;
@@ -173,7 +179,7 @@ button:hover, a:hover {
 /* slogan under logo (Win98 / MS Sans Serif style) */
 .tagline {
   margin-top: 10px;
-  font-family: "Segoe UI", "Verdana", sans-serif;  /* MS-sans-like as requested */
+  font-family: "Segoe UI", "Verdana", sans-serif; /* MS-sans-like as requested */
   font-size: 20px;
   color: #111;
 }
@@ -188,27 +194,27 @@ button:hover, a:hover {
   text-decoration: none;
   color: #fff;
   border-radius: 8px;
-  box-shadow: 10px 10px 0 rgba(0,0,0,0.25);
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.25);
   transition: transform 0.12s ease, filter 0.12s ease;
-  border: 2px solid rgba(255,255,255,0.12);
+  border: 2px solid rgba(255, 255, 255, 0.12);
   border-bottom: 2px solid black;
 }
 
 /* pixel font variant */
 .start-btn.pixel {
-  font-family: 'Press Start 2P', monospace;
+  font-family: "Press Start 2P", monospace;
   font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
   background: linear-gradient(#5398fa, #2468b6);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 /* hover */
 .start-btn.pixel:hover {
   transform: translateY(-3px);
   filter: brightness(1.2);
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.17);
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* ---------------------------
@@ -231,9 +237,8 @@ button:hover, a:hover {
   background: #ece9d8;
   padding: 0;
   overflow: hidden;
-  box-shadow:
-    0 0 0 5px #5ba2ff inset,   /* inner blue outline */
-    10px 10px 0 rgba(0,0,0,0.25);
+  box-shadow: 0 0 0 5px #5ba2ff inset,
+    /* inner blue outline */ 10px 10px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* XP title bar */
@@ -276,14 +281,14 @@ button:hover, a:hover {
   font-weight: bold;
   color: #222;
   border-radius: 2px;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 /* slight coloring for close button */
 .win-btn.close {
   background: linear-gradient(#ff7b7b, #ff4040);
   color: white;
-  border-color: rgba(0,0,0,0.2);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 /* body of xp window */
@@ -323,14 +328,14 @@ button:hover, a:hover {
   z-index: 999;
 
   position: absolute;
-  bottom: 20px;  /* distance from bottom */
+  bottom: 20px; /* distance from bottom */
 }
 
 .marquee-bar marquee {
   font-size: 40px;
   font-weight: bold;
   color: #ffe300;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
 /* ---------------------------
    Responsive tweaks

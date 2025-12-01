@@ -17,6 +17,7 @@ let poseAttempts = []; // number of tries per pose
 
 let maxAttempts = 3;
 let numOfSeconds = 5;
+let perfectCount = 0;
 let instructionConfig = "numerical";
 let emphasisesConfig = "all";
 
@@ -217,16 +218,14 @@ function captureBodyScan() {
         setTimeout(() => {
           captureBodyScan();
         }, 4000);
-      }
-      // --- כשל כללי ---
-      else {
+      } else {
         detectedText.className = "red";
         detectedText.textContent =
           "Body scan failed. Please say yes to try again.";
         speak(detectedText.textContent);
         cornerPic.src = "/static/art/warning.png";
         setTimeout(() => {
-          showInstructions(); // או startListeningBodyScan(); אם אתה רוצה ישר האזנה
+          showInstructions();
         }, 4000);
       }
     })
@@ -271,15 +270,12 @@ function startNextPose() {
   if (nextIndex === -1) {
     // Training complete
     detectedText.textContent = "Training complete!";
-    speechSynthesis.speak(
-      new SpeechSynthesisUtterance("Training complete. Well done!")
-    );
+    speak("Training complete. Well done!");
     cornerPic.src = "/static/art/ok.png";
 
     // Redirect to score
     setTimeout(() => {
-      const perfectCount = poseStatus.filter((s) => s === "done").length;
-      const totalCount = poseStatus.length;
+      const totalCount = poseStatus.length * 8;
       sessionStorage.setItem("perfect", perfectCount);
       sessionStorage.setItem("total", totalCount);
       window.location.href = `/score?perfect=${perfectCount}&total=${totalCount}`;
@@ -311,9 +307,7 @@ function updateCurrentPoseUI() {
     detectedText.className = "white";
     detectedText.textContent = `Next: ${pose}`;
     cornerPic.src = "/static/art/instr.png";
-    const msg = new SpeechSynthesisUtterance(`Next exercise: ${pose}`);
-    msg.lang = "en-US";
-    speechSynthesis.speak(msg);
+    speak(`Next exercise: ${pose}`);
   }
 }
 
@@ -329,6 +323,11 @@ function startCountdownCapture() {
       capturePose();
     }
   }, 1000);
+}
+
+function updatePerfectCount(currWrongs) {
+  let totalJoints = 8;
+  perfectCount += totalJoints - currWrongs;
 }
 
 async function capturePose() {
@@ -375,11 +374,12 @@ async function capturePose() {
       if (data.status === "ok") {
         if (data.len > 0) {
           poseAttempts[currentIndex]++;
-          detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts})`;
+          detectedText.textContent = `${data.msg}\n(${poseAttempts[currentIndex]}/${maxAttempts}) : ${data.len} problems`;
           cornerPic.src = "/static/art/instr.png";
-          speechSynthesis.speak(new SpeechSynthesisUtterance(data.msg));
+          speak(data.msg);
 
           if (poseAttempts[currentIndex] >= maxAttempts) {
+            updatePerfectCount(data.len);
             poseStatus[currentIndex] = "failed";
             updateCurrentPoseUI();
             setTimeout(startNextPose, 1500);
@@ -387,11 +387,12 @@ async function capturePose() {
             setTimeout(startCountdownCapture, 1500);
           }
         } else {
+          updatePerfectCount(data.len);
           poseStatus[currentIndex] = "done";
           updateCurrentPoseUI();
           detectedText.textContent = "Pose correct!";
           cornerPic.src = "/static/art/ok.png";
-          speechSynthesis.speak(new SpeechSynthesisUtterance("Good job!"));
+          speak("Good job!");
           setTimeout(startNextPose, 1500);
         }
       } else {
@@ -410,7 +411,7 @@ async function capturePose() {
 
 //=== Utilities ===//
 function stopListening() {
-  bodyScanListening = false; // <--- חשוב
+  bodyScanListening = false;
   playerMuteIcon.src = "/static/art/muted.png";
   trainerMuteIcon.src = "/static/art/muted.png";
   if (recognition) {
@@ -435,7 +436,7 @@ document.getElementById("startBtn").onclick = () => {
 };
 
 document.getElementById("endBtn").onclick = () => {
-  speechSynthesis.speak(new SpeechSynthesisUtterance("Bye bye!"));
+  speak("Bye bye!");
   trainerMuteIcon.src = "/static/art/unmuted.png";
   stopListening();
   window.location.href = `/welcome`;

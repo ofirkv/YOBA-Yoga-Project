@@ -76,9 +76,8 @@
       <label>Existing injuries (choose all that apply or describe)</label>
       <div class="injuries-list">
         <label><input type="checkbox" name="injuries" value="back" {% if profile and profile.injuries and 'back' in profile.injuries %}checked{% endif %}> Back problems</label><br/>
-        <label><input type="checkbox" name="injuries" value="joints" {% if profile and profile.injuries and 'joints' in profile.injuries %}checked{% endif %}> Joint problems</label><br/>
+        <label><input type="checkbox" name="injuries" value="wrist" {% if profile and profile.injuries and 'joints' in profile.injuries %}checked{% endif %}> Wrist problems</label><br/>
         <label><input type="checkbox" name="injuries" value="ankle" {% if profile and profile.injuries and 'ankle' in profile.injuries %}checked{% endif %}> Ankle injuries</label><br/>
-        <label><input type="checkbox" name="injuries" value="heart" {% if profile and profile.injuries and 'heart' in profile.injuries %}checked{% endif %}> Heart problems</label><br/>
         <label><input type="checkbox" name="injuries" value="balance" {% if profile and profile.injuries and 'balance' in profile.injuries %}checked{% endif %}> Balance problems</label><br/>
       </div>
     <label for="injuries_text">Other / details</label>

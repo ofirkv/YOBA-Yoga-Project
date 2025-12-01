@@ -1,10 +1,11 @@
 /* GLOBAL */
-html, body {
+html,
+body {
   font-family: "Trebuchet MS", Candara, sans-serif;
   margin: 0;
   padding: 0;
   height: 100%;
-  background: url('../static/art/pinkground.png');
+  background: url("../static/art/pinkground.png");
   background-size: cover;
   background-position: center;
   display: flex;
@@ -13,10 +14,13 @@ html, body {
 }
 
 * {
-  cursor: url("../static/art/cursor.cur") 0 0, url("../static/art/cursor.png") 0 0, auto;
+  cursor: url("../static/art/cursor.cur") 0 0,
+    url("../static/art/cursor.png") 0 0, auto;
 }
-button:hover, a:hover {
-  cursor: url("../static/art/handcursor.cur") 0 0, url("../static/art/handcursor.png") 0 0, auto !important;
+button:hover,
+a:hover {
+  cursor: url("../static/art/handcursor.cur") 0 0,
+    url("../static/art/handcursor.png") 0 0, auto !important;
 }
 
 /* WINDOW */
@@ -29,10 +33,8 @@ button:hover, a:hover {
   display: flex;
   flex-direction: column;
   position: relative;
-  box-shadow:
-    8px 8px 0 rgba(0,0,0,0.3),
-    0 0 0 5px #1c74d9 inset,
-    8px 8px 0 rgba(0,0,0,0.4);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.3), 0 0 0 5px #1c74d9 inset,
+    8px 8px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* TITLE BAR */
@@ -76,16 +78,15 @@ button:hover, a:hover {
   line-height: 18px;
   font-weight: bold;
   color: #222;
-  cursor: default;
   border-radius: 2px;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 /* slight coloring for close button */
 .win-btn.close {
   background: linear-gradient(#ff7b7b, #ff4040);
   color: white;
-  border-color: rgba(0,0,0,0.2);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 /* MAIN CONTENT */
@@ -115,11 +116,12 @@ button:hover, a:hover {
   border-right: 3px solid #dcdcdc;
   border-bottom: 3px solid #444;
   border-left: 3px solid #444;
-  image-rendering: pixelated;     /* pixelated vibe */
+  image-rendering: pixelated; /* pixelated vibe */
   image-rendering: crisp-edges;
 }
 
-#video, #canvas {
+#video,
+#canvas {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -144,7 +146,7 @@ button:hover, a:hover {
   font-size: 13px;
   text-align: center;
   color: #fff20b;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   text-shadow: 1px 1px 0 black;
 }
 .yellow {
@@ -152,7 +154,7 @@ button:hover, a:hover {
   font-size: 13px;
   text-align: center;
   color: #fff20b;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   text-shadow: 1px 1px 0 black;
 }
 .red {
@@ -160,7 +162,7 @@ button:hover, a:hover {
   font-size: 13px;
   text-align: center;
   color: #ff0b0b;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   text-shadow: 1px 1px 0 black;
 }
 .white {
@@ -168,7 +170,7 @@ button:hover, a:hover {
   font-size: 13px;
   text-align: center;
   color: #d8d8d8;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   text-shadow: 1px 1px 0 black;
 }
 
@@ -280,7 +282,8 @@ button:hover, a:hover {
   transition: 0.5s;
 }
 
-.mute-icon, .small-icon {
+.mute-icon,
+.small-icon {
   height: 20px;
   width: 20px;
   border: none;
@@ -297,8 +300,8 @@ button:hover, a:hover {
   object-fit: cover;
   bottom: 20px;
   right: 20px;
-  width: 100px !important;;
-  height: 100px !important;;
+  width: 100px !important;
+  height: 100px !important;
   display: block;
   border-radius: 8px;
   background: rgba(145, 145, 145, 0.77);
