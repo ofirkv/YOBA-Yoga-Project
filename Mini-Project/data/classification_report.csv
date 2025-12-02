@@ -1,0 +1,21 @@
+metric,value
+n,559
+accuracy,0.5939177101957175
+precision,0.5971223021571994
+recall,0.9910447761164447
+f1,0.7452300780925
+
+confusion_matrix,value
+TP,332
+FP,224
+FN,3
+TN,0
+
+extra_info,value
+total_processed,559
+num_failed_processing,0
+num_with_ground_truth,559
+num_predicted_raised,556
+num_predicted_lowered,3
+timestamp,"""2025-12-02 13:19:15"""
+kernels_used,"[""sobel_vertical"", ""sobel_horizontal"", ""laplacian"", ""diagonal_main"", ""diagonal_anti""]"

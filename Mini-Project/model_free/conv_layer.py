@@ -2,10 +2,8 @@
 import numpy as np
 
 DEFAULT_CONV_CONFIG = {
-    "pre_smooth": False,
-    "pre_smooth_kernel": "gaussian_5x5",
     "apply_relu": True,
-    "abs_before_relu": False,
+    "abs_before_relu": True,
     "apply_pool": False,
     "pool_size": (2, 2),
     "conv_kwargs": {
@@ -71,17 +69,7 @@ KERNELS = {
         [ 0, -1,  0],
         [-1,  5, -1],
         [ 0, -1,  0]
-    ], dtype=np.float32),
-
-# "Gaussian blur 5x5 (normalized). Use as pre-smoothing to reduce noise."
-    "gaussian_5x5": np.array([
-        [1,  4,  6,  4, 1],
-        [4, 16, 24, 16, 4],
-        [6, 24, 36, 24, 6],
-        [4, 16, 24, 16, 4],
-        [1,  4,  6,  4, 1]
-    ], dtype=np.float32) / 256.0
-
+    ], dtype=np.float32)
 }
 
 # Helper functions
@@ -130,6 +118,7 @@ def apply_convolution(image, kernel, stride = 1, padding = "same", padding_mode 
 
     img = image.astype(np.float32)
     k = kernel.astype(np.float32)
+    k = np.flip(k, axis=(0, 1))
     kH, kW = k.shape
     H, W = img.shape
     sy, sx = _normalize_stride(stride)
@@ -174,7 +163,7 @@ def apply_convolution(image, kernel, stride = 1, padding = "same", padding_mode 
 
 
 # === Activation functions ===
-def activation_relu(feature_map, inplace = False, abs_before = False):
+def activation_relu(feature_map, abs_before = False):
     """
     Apply ReLU activation: max(0, x)
     Parameters:
@@ -186,10 +175,7 @@ def activation_relu(feature_map, inplace = False, abs_before = False):
     Note: abs_before can be useful for Sobel-like outputs where direction is not important,
     and you want the magnitude of the response before zeroing negatives.
     """
-    if not inplace:
-        fm = feature_map.astype(np.float32).copy()
-    else:
-        fm = feature_map.astype(np.float32)
+    fm = feature_map.astype(np.float32)
 
     if abs_before:
         fm = np.abs(fm)
@@ -271,9 +257,6 @@ def apply_multiple_kernels(image, kernels, config = DEFAULT_CONV_CONFIG):
     """
 
     img = image.astype(np.float32).copy()
-
-    if config["pre_smooth"]:
-        img = apply_convolution(img, get_kernel(config["pre_smooth_kernel"]), **config["conv_kwargs"])
 
     maps = []
     for k in kernels:

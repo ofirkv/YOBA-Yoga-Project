@@ -3,10 +3,13 @@ from pathlib import Path
 import csv
 import numpy as np
 
-# Local imports from the package
-from .io_utils import list_images, read_labels_csv
-from . import conv_layer as conv_layer_module  # used for default conv fn
-from . import preprocessing as preprocessing_module  # used for default preprocess fn
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # מוסיף את תיקיית model_free ל-path
+
+from io_utils import list_images, read_labels_csv
+import conv_layer as conv_layer_module
+import preprocessing as preprocessing_module
 
 EPS = 1e-9
 
@@ -64,37 +67,38 @@ def compute_per_map_stats(feature_map, threshold = None):
 
     fmap = feature_map.astype(np.float32).copy()
     
-    fmap = np.abs(fmap)
+    mean_signed = float(fmap.mean()) if fmap.size > 0 else 0.0
 
-    if fmap.max() > 0:
-        fmap /= fmap.max()
+    abs_map = np.abs(fmap)
 
-    total = float(fmap.sum())
-    mean = float(fmap.mean()) if fmap.size > 0 else 0.0
-    std = float(fmap.std()) if fmap.size > 0 else 0.0
-    maxval = float(fmap.max()) if fmap.size > 0 else 0.0
+
+    max_abs = float(abs_map.max()) if abs_map.size > 0 else 0.0
+    total = float(abs_map.sum())
+    mean_abs = float(abs_map.mean()) if abs_map.size > 0 else 0.0
+    std_abs = float(abs_map.std()) if abs_map.size > 0 else 0.0
 
     if threshold is None:
-        threshold_local = max(0.1 * maxval, EPS)
+        threshold_local = max(0.1 * max_abs, EPS)
     else:
         threshold_local = float(threshold)
         
-    # percent above threshold
-    if fmap.size == 0:
+
+    if abs_map.size == 0:
         pct = 0.0
     else:
-        cnt = float((fmap > threshold_local).sum())
-        pct = cnt / float(fmap.size)
+        cnt = float((abs_map > threshold_local).sum())
+        pct = cnt / float(abs_map.size)
 
     y_c, x_c = _compute_center_of_mass_2d(fmap)
 
     return {
         "sum_total": total,
-        "mean": mean,
-        "std": std,
-        "max": maxval,
+        "mean": mean_abs,
+        "std": std_abs,
+        "max": max_abs,
         "percent_above_threshold": pct,
         "center_of_mass": (y_c, x_c),
+        "mean_signed": mean_signed,
     }
 
 
@@ -121,6 +125,7 @@ def aggregate_stats_across_maps(feature_maps, kernel_names = None, threshold = N
     means = []
     percent_list = []
     max_list = []
+    signed_means = []
 
     for i in range(n_k):
         pm = compute_per_map_stats(feature_maps[i], threshold=threshold)
@@ -129,11 +134,13 @@ def aggregate_stats_across_maps(feature_maps, kernel_names = None, threshold = N
         means.append(pm["mean"])
         percent_list.append(pm["percent_above_threshold"])
         max_list.append(pm["max"])
+        signed_means.append(pm["mean_signed"])
 
     totals = np.array(totals, dtype=np.float32)
     means = np.array(means, dtype=np.float32)
     max_list = np.array(max_list, dtype=np.float32)
     percent_list = np.array(percent_list, dtype=np.float32)
+    signed_means = np.array(signed_means, dtype=np.float32)
 
     sum_total_global = float(totals.sum())
     mean_of_means = float(means.mean()) if means.size > 0 else 0.0
@@ -141,9 +148,9 @@ def aggregate_stats_across_maps(feature_maps, kernel_names = None, threshold = N
     max_overall = float(max_list.max()) if max_list.size > 0 else 0.0
     avg_percent_above = float(percent_list.mean()) if percent_list.size > 0 else 0.0
 
-    # global center of mass computed from combined map
+    # global center of mass computed from combined map (using abs energy)
     combined_map = feature_maps.sum(axis=0)
-    com_global = _compute_center_of_mass_2d(combined_map)
+    com_global = _compute_center_of_mass_2d(np.abs(combined_map))
 
     result = {
         "per_map": per_map,
@@ -158,34 +165,59 @@ def aggregate_stats_across_maps(feature_maps, kernel_names = None, threshold = N
         "W": W,
     }
 
-    # If kernel_names provided, compute coarse directional energies
-    if kernel_names is not None and len(kernel_names) == n_k:
-        vertical_energy = 0.0
-        horizontal_energy = 0.0
-        diagonal_energy = 0.0
-        other_energy = 0.0
+    kernel_direction = {
+        "sobel_vertical": "vertical",
+        "sobel_horizontal": "horizontal",
+        "diagonal_main": "diagonal",
+        "diagonal_anti": "diagonal",
+        "laplacian": "other",
+        "sharpen": "other",
+        "identity": "other"
+    }
 
-        for name, tot in zip(kernel_names, totals):
-            lname = str(name).lower()
-            if "vertical" in lname or "sobel_v" in lname or "vert" in lname:
-                vertical_energy += float(tot)
-            elif "horizontal" in lname or "sobel_h" in lname or "horiz" in lname:
-                horizontal_energy += float(tot)
-            elif "diag" in lname or "diagonal" in lname:
-                diagonal_energy += float(tot)
-            else:
-                other_energy += float(tot)
+    vertical_energy = 0.0
+    horizontal_energy = 0.0
+    diagonal_energy = 0.0
+    other_energy = 0.0
 
-        result.update({
-            "vertical_energy": vertical_energy,
-            "horizontal_energy": horizontal_energy,
-            "diagonal_energy": diagonal_energy,
-            "other_energy": other_energy,
-        })
-        # ratio safely
-        denom = horizontal_energy + EPS
-        result["vertical_vs_horizontal"] = vertical_energy / denom
-        result["vertical_ratio_of_total"] = vertical_energy / (vertical_energy + horizontal_energy + diagonal_energy + other_energy + EPS)
+    signed_weighted_vert = 0.0
+    signed_weighted_horiz = 0.0
+
+    for name, tot, signed_mean in zip(kernel_names, totals, signed_means):
+        lname = str(name).lower()
+
+        # use explicit mapping; default to "other"
+        direction = kernel_direction.get(lname, "other")
+
+        if direction == "vertical":
+            vertical_energy += float(tot)
+            signed_weighted_vert += float(signed_mean) * float(tot)
+
+        elif direction == "horizontal":
+            horizontal_energy += float(tot)
+            signed_weighted_horiz += float(signed_mean) * float(tot)
+
+        elif direction == "diagonal":
+            diagonal_energy += float(tot)
+
+        else:
+            other_energy += float(tot)
+
+    # Update result
+    result.update({
+        "vertical_energy": vertical_energy,
+        "horizontal_energy": horizontal_energy,
+        "diagonal_energy": diagonal_energy,
+        "other_energy": other_energy
+    })
+
+    result["vertical_vs_horizontal"] = vertical_energy / (horizontal_energy + EPS)
+    result["vertical_ratio_of_total"] = vertical_energy / (
+        vertical_energy + horizontal_energy + diagonal_energy + other_energy + EPS
+    )
+
+    result["mean_signed_vertical"] = signed_weighted_vert / (vertical_energy + EPS)
+    result["mean_signed_horizontal"] = signed_weighted_horiz / (horizontal_energy + EPS)
 
     return result
 
@@ -204,6 +236,8 @@ def feature_names_for_set():
         "max_overall",
         "mean_of_means",
         "std_of_means",
+        "mean_signed_vertical",
+        "mean_signed_horizontal",
     ]
 
 
@@ -218,17 +252,24 @@ def compute_feature_vector(feature_maps, kernel_names = None, threshold = None):
     agg = aggregate_stats_across_maps(feature_maps, kernel_names=kernel_names, threshold=threshold)
 
     H = int(agg.get("H", 0))
-    # combined map for top/bottom computations
     combined = np.array(feature_maps.sum(axis=0), dtype=np.float32)
     sum_total = float(agg["sum_total_global"])
     sum_total_nonzero = sum_total if sum_total > EPS else EPS
 
-    # ratio top/bottom
-    half = H // 2 if H > 1 else 1
-    top_energy = float(combined[:half, :].sum())
-    ratio_top_bottom = top_energy / sum_total_nonzero
+    # ratio top2/bottom2 using 4 stripes (more robust than half)
+    if H > 3:
+        band = max(1, H // 4)
+        top2 = float(combined[:2*band, :].sum())
+        bottom2 = float(combined[-2*band:, :].sum())
+    else:
+        # fallback to simple half if too small
+        half = H // 2 if H > 1 else 1
+        top2 = float(combined[:half, :].sum())
+        bottom2 = float(combined[half:, :].sum())
 
-    center_of_mass_y = float(agg["center_of_mass_global"][0])  # normalized 0..1
+    ratio_top_bottom = top2 / (bottom2 + EPS)
+    
+    center_of_mass_y = float(agg["center_of_mass_global"][0]) if agg.get("center_of_mass_global") is not None else 0.5
 
     avg_pct = float(agg["avg_percent_above_threshold"])
     max_overall = float(agg["max_overall"])
@@ -239,9 +280,13 @@ def compute_feature_vector(feature_maps, kernel_names = None, threshold = None):
     if "vertical_energy" in agg and "horizontal_energy" in agg:
         horiz = float(agg["horizontal_energy"])
         vert = float(agg["vertical_energy"])
-        horizontal_vs_vertical_ratio = vert / (horiz + EPS)
+        horizontal_vs_vertical_ratio = vert / max(horiz, EPS)
+        horizontal_vs_vertical_ratio = np.clip(horizontal_vs_vertical_ratio, 0.0, 10.0)
     else:
         horizontal_vs_vertical_ratio = 0.0
+
+    mean_signed_vertical = float(agg.get("mean_signed_vertical", 0.0))
+    mean_signed_horizontal = float(agg.get("mean_signed_horizontal", 0.0))
 
     feature_names = feature_names_for_set()
     vec = np.array([
@@ -252,39 +297,11 @@ def compute_feature_vector(feature_maps, kernel_names = None, threshold = None):
         horizontal_vs_vertical_ratio,
         max_overall,
         mean_of_means,
-        std_of_means
+        std_of_means,
+        mean_signed_vertical,
+        mean_signed_horizontal
     ], dtype=np.float32)
     return vec, feature_names
-
-
-# def save_feature_vectors_csv(csv_path, feature_matrix, feature_names, filenames, labels = None,overwrite = False):
-#     """
-#     Save feature_matrix to CSV.
-#     Header: filename,label,feat1,feat2,...
-#     feature_matrix shape: (N, D); filenames length N
-#     labels optional list length N
-#     """
-#     csv_p = Path(csv_path)
-#     if csv_p.exists() and not overwrite:
-#         raise FileExistsError(f"File exists: {csv_p}")
-
-#     csv_p.parent.mkdir(parents=True, exist_ok=True)
-
-#     with csv_p.open("w", newline="", encoding="utf-8") as f:
-#         writer = csv.writer(f)
-#         header = ["filename"]
-#         if labels is not None:
-#             header.append("label")
-#         header.extend(feature_names)
-#         writer.writerow(header)
-
-#         N = feature_matrix.shape[0]
-#         for i in range(N):
-#             row = [filenames[i]]
-#             if labels is not None:
-#                 row.append(labels[i])
-#             row.extend([float(x) for x in feature_matrix[i]])
-#             writer.writerow(row)
 
 
 def calibrate_thresholds(feature_matrix, labels, feature_names, positive_label = "raised", method = "percentile"):

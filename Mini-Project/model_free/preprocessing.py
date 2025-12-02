@@ -1,10 +1,12 @@
 # Mini-Project/model_free/preprocessing.py
 from pathlib import Path
-
 import cv2
 import numpy as np
 
-from .io_utils import load_image, list_images
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # מוסיף את תיקיית model_free ל-PATH
+from io_utils import load_image, list_images
 
 def to_grayscale(image):
     """
@@ -14,6 +16,10 @@ def to_grayscale(image):
     if image.ndim == 2:
         return image
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
+def denoise(image):
+    return cv2.GaussianBlur(image, (3,3), 0)
 
 
 def resize(image, size = (128, 128)):
@@ -28,8 +34,10 @@ def normalize(image):
     """
     Normalize pixel values to range [0, 1] as float32.
     """
-    image = image.astype("float32")
-    return image / 255.0
+    image = image.astype("float32") / 255.0
+    mean = np.mean(image)
+    std = np.std(image) + 1e-8
+    return (image - mean) / std
 
 
 def preprocess_image(path_or_image):
@@ -52,7 +60,8 @@ def preprocess_image(path_or_image):
         raise TypeError("Input must be file path or numpy array")
 
     gray = to_grayscale(image)
-    resized = resize(gray)
+    blurred = denoise(gray)
+    resized = resize(blurred)
     normalized = normalize(resized)
 
     return normalized
