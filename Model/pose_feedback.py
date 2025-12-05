@@ -5,7 +5,7 @@ from Model.pose_utils import ANGLE_NAMES
 from Model.feature_extractor import FeatureExtractor
 import os
 
-METAPHORICAL_INSTR_PATH = os.path.join(os.path.dirname(__file__), "..", "Server", "metaphorical_instructions.json")
+METAPHORICAL_INSTR_PATH = os.path.join(os.path.dirname(__file__), "..", "Model", "metaphorical_instructions.json")
 
 SIDE_EN = {"left": "left", "right": "right"}
 JOINT_LABEL_EN = {"elbow": "elbow", "shoulder": "shoulder", "knee": "knee", "hip": "hip"}

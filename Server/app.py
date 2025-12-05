@@ -6,7 +6,6 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import os
-import time
 import json
 import sys
 import pathlib
@@ -20,7 +19,7 @@ sys.path.append(str(PROJECT_ROOT))
 
 # === Model Imports ===
 from Model.pose_detector import PoseDetector
-from Model.pose_utils import compute_all_angles, compute_all_angle_directions, ANGLE_NAMES
+from Model.pose_utils import compute_all_angles, compute_all_angle_directions
 from Model.feature_extractor import FeatureExtractor
 from Model.pose_feedback import PoseFeedback
 
@@ -265,7 +264,6 @@ def check_pose_injuries():
         return jsonify({"warning": False})
 
     data = request.get_json()
-    pose_name = data.get("pose")
     pose_category = data.get("category")  # we will send from frontend
 
     conn = get_db_connection()
@@ -282,8 +280,8 @@ def check_pose_injuries():
 
     CONFLICT_MAP = {
         "back": ["back", "standing", "abs"],
-        "ankle": ["sitting", "balance", "back"],
-        "wrist": ["standing", "balance"],
+        "ankle": ["balance", "standing"],
+        "wrist": ["abs", "back"],
         "balance": ["balance"]
     }
 
@@ -358,12 +356,7 @@ def upload_burst():
         # --- Initialize best variables ---
         best_len = 100
         current_best_confidence = 0
-        best_filepath = ""
-        best_wrongs = {}
         best_message = ""
-        best_angles = None
-        best_directions = None
-
         CONFIDENCE_THRESHOLD = 0.6
 
         # --- Process each image ---
@@ -415,9 +408,6 @@ def upload_burst():
                 # --- Update best if necessary ---
                 if len(wrongs) < best_len or (len(wrongs) == best_len and confidence > current_best_confidence):
                     best_len = len(wrongs)
-                    best_wrongs = wrongs
-                    best_angles = angles
-                    best_directions = directions
                     best_message = instr
                     current_best_confidence = confidence
 
@@ -481,9 +471,6 @@ def first_scan():
 
 
 # === Index & Score Routes ===
-@app.route("/")
-def index():
-    return redirect(url_for("login"))
 
 @app.route("/score")
 def score():
@@ -522,6 +509,11 @@ def get_config():
         return jsonify(data)
     else:
         return jsonify({"error": "Config not found"}), 404
+
+
+@app.route("/")
+def index():
+    return redirect(url_for("login"))
 
 # === Run App ===
 if __name__ == "__main__":

@@ -70,6 +70,7 @@ async function loadConfig() {
     return null;
   }
 }
+
 loadConfig().then((config) => {
   if (config) {
     maxAttempts = config.attempts;
@@ -103,6 +104,7 @@ function speak(text) {
   utterance.lang = "en-US";
   speechSynthesis.speak(utterance);
 }
+
 function startListeningBodyScan() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
@@ -150,7 +152,7 @@ function startListeningBodyScan() {
       stopListening();
       captureBodyScan();
     } else {
-      detectedText.className = "yellow";
+      detectedText.className = "white";
       detectedText.textContent = "Please say 'yes' when you're ready";
       speak(detectedText.textContent);
     }
@@ -382,20 +384,22 @@ async function capturePose() {
             updatePerfectCount(data.len);
             poseStatus[currentIndex] = "failed";
             updateCurrentPoseUI();
-            setTimeout(startNextPose, 1500);
+            setTimeout(startNextPose, 2067);
           } else {
-            setTimeout(startCountdownCapture, 1500);
+            setTimeout(startCountdownCapture, 2067);
           }
-        } else {
+        }
+        else {
           updatePerfectCount(data.len);
           poseStatus[currentIndex] = "done";
           updateCurrentPoseUI();
           detectedText.textContent = "Pose correct!";
           cornerPic.src = "/static/art/ok.png";
           speak("Good job!");
-          setTimeout(startNextPose, 1500);
+          setTimeout(startNextPose, 2067);
         }
-      } else {
+      }
+      else {
         detectedText.className = "red";
         detectedText.textContent = data.message || "unknown";
         cornerPic.src = "/static/art/no.png";

@@ -57,9 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
   posesGrid.addEventListener("click", async (e) => {
     const card = e.target.closest(".pose-card");
     if (!card) return;
-
-    if (!card) return;
-
     const pose = card.dataset.poseId;
     const category = card.dataset.category;
 
