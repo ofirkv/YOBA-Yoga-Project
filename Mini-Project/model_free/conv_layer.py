@@ -14,11 +14,11 @@ DEFAULT_CONV_CONFIG = {
 }
 
 DEFAULT_IMPORTANT_KERNELS = [
-    "sobel_vertical",
     "sobel_horizontal",
-    "laplacian",
+    "sobel_vertical",
     "diagonal_main",
-    "diagonal_anti"
+    "diagonal_anti",
+    "laplacian",
 ]
 
 KERNELS = {

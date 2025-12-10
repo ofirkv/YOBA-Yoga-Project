@@ -9,38 +9,44 @@ from pathlib import Path
 EPS = 1e-9
 
 DEFAULT_THRESHOLDS = {
-  "sum_total_global": 8734.764,
-  "ratio_top_bottom": 0.854,
-  "center_of_mass_y": 0.543,
-  "horizontal_vs_vertical_ratio": 1.174,
-  "mean_of_means": 0.076,
-  "std_of_means": 0.068,
-  "mean_signed_vertical": 0.051,
-  "mean_signed_horizontal": 0.044
+  "sum_total_global": 9430.701171875,
+  "ratio_top_bottom": 0.8906041383743286,
+  "center_of_mass_y": 0.5348625779151917,
+  "avg_percent_above_threshold": 0.24429841339588165,
+  "horizontal_vs_vertical_ratio": 1.203217089176178,
+  "max_overall": 1.0,
+  "mean_of_means": 0.08222918957471848,
+  "std_of_means": 0.06356267631053925,
+  "mean_signed_vertical": 0.04727532900869846,
+  "mean_signed_horizontal": 0.0425900686532259
 }
 
 DEFAULT_WEIGHTS = {
-  "sum_total_global": 0.048,
-  "ratio_top_bottom": 0.3,
-  "center_of_mass_y": 0.332,
-  "horizontal_vs_vertical_ratio": 0.019,
-  "mean_of_means": 0.048,
-  "std_of_means": 0.099,
-  "mean_signed_vertical": 0.071,
-  "mean_signed_horizontal": 0.04
+  "sum_total_global": -0.8107509016990662,
+  "ratio_top_bottom": 0.16873857378959656,
+  "center_of_mass_y": -1.451520323753357,
+  "avg_percent_above_threshold": -0.6041187047958374,
+  "horizontal_vs_vertical_ratio": -0.024296436458826065,
+  "max_overall": -0.003595224115997553,
+  "mean_of_means": -0.8151381015777588,
+  "std_of_means": 1.1300132274627686,
+  "mean_signed_vertical": 1.0690827369689941,
+  "mean_signed_horizontal": 0.8689619302749634
 }
 
-SCORE_THRESHOLD = 0.17658931016921997
+SCORE_THRESHOLD = 0.4209626317024231
 
 GOOD_FEATURES = [
-    "ratio_top_bottom",
-    "sum_total_global",
-    "center_of_mass_y",
-    "mean_of_means",
-    "std_of_means",
-    "horizontal_vs_vertical_ratio",
-    "mean_signed_vertical",
-    "mean_signed_horizontal"
+  "sum_total_global",
+  "ratio_top_bottom",
+  "center_of_mass_y",
+  "avg_percent_above_threshold",
+  "horizontal_vs_vertical_ratio",
+  "max_overall",
+  "mean_of_means",
+  "std_of_means",
+  "mean_signed_vertical",
+  "mean_signed_horizontal"
 ]
 
 # Features where smaller value implies 'raised' (invert signal)

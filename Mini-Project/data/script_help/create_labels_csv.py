@@ -17,7 +17,7 @@ def main():
 
     # Prepare rows
     rows = []
-    cutoff_id = 369  # img_369 is last raised
+    cutoff_id = 297  # img_297 is last raised
 
     for img in image_files:
         name = img.stem  # "img_001"

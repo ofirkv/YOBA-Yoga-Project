@@ -1,6 +1,6 @@
 {
   "instructions": "metaphorical",
-  "attempts": "3",
-  "time": "7",
+  "attempts": "infinity",
+  "time": "5",
   "emphasises": "all"
 }

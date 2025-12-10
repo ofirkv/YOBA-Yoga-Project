@@ -1,12 +1,12 @@
 {
-  "sum_total_global": 8734.7646484375,
-  "ratio_top_bottom": 0.854360818862915,
-  "center_of_mass_y": 0.5436480045318604,
-  "avg_percent_above_threshold": 0.2113730013370514,
-  "horizontal_vs_vertical_ratio": 1.1745129823684692,
+  "sum_total_global": 9430.701171875,
+  "ratio_top_bottom": 0.8906041383743286,
+  "center_of_mass_y": 0.5348625779151917,
+  "avg_percent_above_threshold": 0.24429841339588165,
+  "horizontal_vs_vertical_ratio": 1.203217089176178,
   "max_overall": 1.0,
-  "mean_of_means": 0.07616099715232849,
-  "std_of_means": 0.06842900067567825,
-  "mean_signed_vertical": 0.05137699842453003,
-  "mean_signed_horizontal": 0.04434499889612198
+  "mean_of_means": 0.08222918957471848,
+  "std_of_means": 0.06356267631053925,
+  "mean_signed_vertical": 0.04727532900869846,
+  "mean_signed_horizontal": 0.0425900686532259
 }

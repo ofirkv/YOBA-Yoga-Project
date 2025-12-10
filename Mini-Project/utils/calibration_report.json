@@ -1,0 +1,30 @@
+{
+  "n_examples": 540,
+  "best_score_threshold": 0.4209626317024231,
+  "best_threshold_metrics": {
+    "tp": 209,
+    "fp": 95,
+    "fn": 61,
+    "tn": 175,
+    "precision": 0.6874999999977385,
+    "recall": 0.7740740740712072,
+    "f1": 0.7282229960148964,
+    "accuracy": 0.7111111111097943
+  },
+  "train_metrics_at_0.5": {
+    "tp": 183,
+    "fp": 59,
+    "fn": 87,
+    "tn": 211,
+    "precision": 0.7561983471043132,
+    "recall": 0.6777777777752675,
+    "f1": 0.714843749498703,
+    "accuracy": 0.7296296296282785
+  },
+  "hyperparams": {
+    "lr": 0.1,
+    "epochs": 100000,
+    "weight_decay": 0.0001,
+    "bias": false
+  }
+}

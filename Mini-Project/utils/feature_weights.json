@@ -1,12 +1,12 @@
 {
-  "sum_total_global": 0.04790292702241073,
-  "ratio_top_bottom": 0.29776203768966036,
-  "center_of_mass_y": 0.332078309390604,
-  "avg_percent_above_threshold": 0.045210596381424994,
-  "horizontal_vs_vertical_ratio": 0.019542837605134644,
-  "max_overall": 0.0,
-  "mean_of_means": 0.047902982901765465,
-  "std_of_means": 0.099309981324921,
-  "mean_signed_vertical": 0.07149777594228882,
-  "mean_signed_horizontal": 0.03879255074178998
+  "sum_total_global": -0.8107509016990662,
+  "ratio_top_bottom": 0.16873857378959656,
+  "center_of_mass_y": -1.451520323753357,
+  "avg_percent_above_threshold": -0.6041187047958374,
+  "horizontal_vs_vertical_ratio": -0.024296436458826065,
+  "max_overall": -0.003595224115997553,
+  "mean_of_means": -0.8151381015777588,
+  "std_of_means": 1.1300132274627686,
+  "mean_signed_vertical": 1.0690827369689941,
+  "mean_signed_horizontal": 0.8689619302749634
 }
