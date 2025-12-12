@@ -5,7 +5,7 @@ import numpy as np
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # מוסיף את תיקיית model_free ל-PATH
+sys.path.insert(0, str(Path(__file__).resolve().parent)) 
 from io_utils import load_image, list_images
 
 def to_grayscale(image):

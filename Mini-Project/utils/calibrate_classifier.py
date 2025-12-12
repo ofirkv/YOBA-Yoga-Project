@@ -1,5 +1,4 @@
 #utils/calibrate_classifier.py
-
 import csv
 import json
 from pathlib import Path
@@ -99,7 +98,8 @@ def train_gradient_descent(Z, y, lr=0.1, epochs=1000, weight_decay=1e-4, seed=0,
         grad = Z.T.dot(probs - y) / N + weight_decay * w
         w -= lr * grad
         if verbose and (epoch == 1 or epoch % (epochs // 5 or 1) == 0 or epoch == epochs):
-            print(f"[train] epoch {epoch}/{epochs} loss={loss:.6f}")
+            acc = 1 - np.abs(np.round(probs) - y).sum() / len(y)
+            print(f"[train] epoch {epoch}/{epochs} loss={loss:.6f} acc={acc:.4f}")
     return w
 
 
@@ -143,7 +143,7 @@ def main(features=None,
          labels=None,
          out_dir=None,
          lr=0.1,
-         epochs=100000,
+         epochs=200,
          weight_decay=1e-4,
          seed=0,
          add_bias=False,

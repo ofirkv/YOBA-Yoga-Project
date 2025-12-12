@@ -22,19 +22,19 @@ DEFAULT_THRESHOLDS = {
 }
 
 DEFAULT_WEIGHTS = {
-  "sum_total_global": -0.8107509016990662,
-  "ratio_top_bottom": 0.16873857378959656,
-  "center_of_mass_y": -1.451520323753357,
-  "avg_percent_above_threshold": -0.6041187047958374,
-  "horizontal_vs_vertical_ratio": -0.024296436458826065,
-  "max_overall": -0.003595224115997553,
-  "mean_of_means": -0.8151381015777588,
-  "std_of_means": 1.1300132274627686,
-  "mean_signed_vertical": 1.0690827369689941,
-  "mean_signed_horizontal": 0.8689619302749634
+  "sum_total_global": 0.05778217315673828,
+  "ratio_top_bottom": -0.4423084557056427,
+  "center_of_mass_y": -0.7852282524108887,
+  "avg_percent_above_threshold": -0.1377377063035965,
+  "horizontal_vs_vertical_ratio": -0.03750080615282059,
+  "max_overall": -0.009753220714628696,
+  "mean_of_means": 0.049660809338092804,
+  "std_of_means": -0.029878200963139534,
+  "mean_signed_vertical": 0.28921234607696533,
+  "mean_signed_horizontal": 0.1721014529466629
 }
 
-SCORE_THRESHOLD = 0.4209626317024231
+SCORE_THRESHOLD = 0.4259198307991028
 
 GOOD_FEATURES = [
   "sum_total_global",
